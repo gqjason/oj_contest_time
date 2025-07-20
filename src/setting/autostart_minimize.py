@@ -30,7 +30,7 @@ class AutoStartMinimize:
         if self.asm_enable:
             
             try:
-                aso._configure_windows_autostart(True)
+                aso._configure_windows_autostart(False)
                 reg_key = reg.CreateKey(key, key_path)
                 reg.SetValueEx(reg_key, app_name, 0, reg.REG_SZ, exe_path)
                 reg.CloseKey(reg_key)
@@ -45,7 +45,6 @@ class AutoStartMinimize:
         elif not self.asm_enable and not self.as_enable:
             
             try:
-                aso._configure_windows_autostart(False)
                 try:
                     reg_key = reg.OpenKey(key, key_path, 0, reg.KEY_SET_VALUE)
                     reg.DeleteValue(reg_key, app_name)
