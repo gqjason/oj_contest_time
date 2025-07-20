@@ -1,3 +1,4 @@
+import sys
 import os
 import threading
 from datetime import datetime
@@ -48,11 +49,19 @@ class FileLogger:
             
         except PermissionError:
             
-            self.log_dir = os.path.join(os.getcwd(), "logs")
+            self.log_dir = os.path.join(self.get_base_path, "logs")
             if not os.path.exists(self.log_dir):
                 os.makedirs(self.log_dir)
                 
         #print(self.log_dir)
+    
+    @staticmethod
+    def get_base_path(self):
+        """获取项目根路径（支持 PyInstaller 打包和未打包运行）"""
+        if getattr(sys, 'frozen', False):  # 如果是打包后的程序
+            return os.path.dirname(sys.executable)
+        else:
+            return os.path.dirname(os.path.abspath(__file__))
     
     def _get_log_path(self, file_name):
         """生成日志文件路径"""
