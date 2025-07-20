@@ -1,0 +1,9 @@
+{
+    "autostart": false,
+    "minimize_to_tray": false,
+    "autostart_minimize": false,
+    "desktop_notify": false,
+    "notify_receiver_email": "",
+    "theme": "light",
+    "language": "zh_CN"
+}

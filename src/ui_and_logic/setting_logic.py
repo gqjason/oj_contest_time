@@ -7,14 +7,11 @@ import datetime
 import random
 from pathlib import Path
 
-from setting.autostarting import AutoStartOption as ASO
 from setting.minimize_to_tray import MinimizeToTray as MTT
-from setting.autostart_minimize import AutoStartMinimize as ASM
-from information.capture import CaptureAllInformation as CAI
+from setting.autostart_manager import AutoStartManager as ASM
 from logger import FileLogger
 
 file_name = "setting_logic.py"
-
 class SettingsManager:
     class_name = "SettingsManager"
 
@@ -120,59 +117,53 @@ class SettingsManager:
                 return True
         return False
 
+
     def apply_system_settings(self):
-        """将设置应用到操作系统"""
+        mtt = MTT(self.main_window)
+        asm = ASM()
         try:
             self.logger.info(f"[{file_name}][{self.class_name}] 正在应用系统设置...")
 
-            as_enable = self.settings["autostart"]
-            asm_enable = self.settings["autostart_minimize"]
+            autostart = self.settings.get("autostart", False)
+            autostart_minimized = self.settings.get("autostart_minimize", False)
+            minimize_to_tray = self.settings.get("minimize_to_tray", False)
+            desktop_notify = self.settings.get("desktop_notify", False)
 
-            aso = ASO()
-            if as_enable and not asm_enable:
-                self.logger.info(f"[{file_name}][{self.class_name}] 正在配置开机自启动...")
-                aso.configure_autostart(enable=True)
-                self.logger.info(f"[{file_name}][{self.class_name}] 已经配置开机自启动...")
-            else:
-                self.logger.info(f"[{file_name}][{self.class_name}] 正在禁用开机自启动...")
-                aso.configure_autostart(enable=False)
-                self.logger.info(f"[{file_name}][{self.class_name}] 已经禁用开机自启动...")
+            # ✅ 合并开机启动逻辑
+            try:
+                self.logger.info(f"[{file_name}][{self.class_name}] 正在设置开机自启动和静默启动...")
+                asm.apply(autostart, autostart_minimized)
+                self.logger.info(f"[{file_name}][{self.class_name}] 开机启动设置完成")
+            except Exception as e:
+                self.logger.error(f"[{file_name}][{self.class_name}] 开机启动设置失败: {e}")
+                return False
 
+            # ✅ 最小化托盘逻辑
             if self.main_window:
-                mtt = MTT(self.main_window)
-                if self.settings["minimize_to_tray"]:
-                    self.logger.info(f"[{file_name}][{self.class_name}] 正在开启最小化到后台运行...")
+                if minimize_to_tray:
+                    self.logger.info(f"[{file_name}][{self.class_name}] 启用最小化托盘...")
                     mtt.enable_running()
-                    self.logger.info(f"[{file_name}][{self.class_name}] 已经开启最小化到后台运行...")
                 else:
-                    self.logger.info(f"[{file_name}][{self.class_name}] 正在关闭最小化到后台运行...")
+                    self.logger.info(f"[{file_name}][{self.class_name}] 禁用最小化托盘...")
                     mtt.disable_running()
-                    self.logger.info(f"[{file_name}][{self.class_name}] 已经关闭最小化到后台运行...")
             else:
                 self.logger.warning(f"[{file_name}][{self.class_name}] 主窗口未设置，跳过最小化托盘设置")
 
-            try:
-                asm = ASM(as_enable, asm_enable)
-                asm.enable_autostart_minimize()
-                self.logger.info(f"[{file_name}][{self.class_name}] 开启静默启动成功")
-            except Exception as e:
-                self.logger.error(f"[{file_name}][{self.class_name}] 关闭静默启动失败\n错误: {e}")
-                return False
-
-            if self.settings["desktop_notify"]:
+            # ✅ 桌面通知
+            if desktop_notify:
                 self.logger.info(f"[{file_name}][{self.class_name}] 启用桌面通知...")
                 self.switch_system_notification(True)
             else:
                 self.logger.info(f"[{file_name}][{self.class_name}] 禁用桌面通知...")
+                self.switch_system_notification(False)
 
             self.logger.info(f"[{file_name}][{self.class_name}] 成功保存设置")
+            return True
 
         except Exception as e:
-            self.logger.error(
-                f"[{file_name}][{self.class_name}][apply_system_settings] 保存设置失败\n错误: {e}")
+            self.logger.error(f"[{file_name}][{self.class_name}][apply_system_settings] 保存设置失败\n错误: {e}")
             return False
 
-        return True
 
     def handle_cancel(self, dialog):
         """处理取消按钮点击事件"""
