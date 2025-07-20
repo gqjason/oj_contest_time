@@ -1,0 +1,3 @@
+@echo off
+echo 使用Python清理工具...
+python scripts\clean.py

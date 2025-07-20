@@ -1,0 +1,20 @@
+# 构建产物
+build/
+dist/
+*.spec
+
+# Python 编译文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 虚拟环境
+venv/
+
+# 日志文件
+logs/*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
