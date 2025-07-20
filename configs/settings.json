@@ -1,6 +1,6 @@
 {
     "autostart": false,
-    "minimize_to_tray": true,
+    "minimize_to_tray": false,
     "autostart_minimize": false,
     "desktop_notify": false,
     "notify_receiver_email": "",

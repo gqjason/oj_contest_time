@@ -1,66 +1,36 @@
 @echo off
-setlocal enabledelayedexpansion
+REM 创建 Python 虚拟环境
 
-echo Cleaning up old builds...
 call clean.bat
 
-echo Installing dependencies...
+REM 检查是否已安装 Python
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo 未检测到 Python，请先安装 Python。
+    exit /b 1
+)
+
+REM 在项目根目录创建虚拟环境目录 venv
+python -m venv ..\venv
+echo 正在创建虚拟环境
+if exist ..\venv (
+    echo 虚拟环境已创建在项目根目录的 venv 文件夹中。
+) else (
+    echo 虚拟环境创建失败。
+    exit /b 1
+)
+
+call ..\venv\Scripts\activate.bat
 call install.bat
 
-echo Packaging the application...
+echo 当前虚拟环境中已安装的库如下：
+pip list
 
-:: 设置项目根目录
-set "PROJECT_ROOT=%~dp0.."
-set "PROJECT_ROOT=%PROJECT_ROOT:~0,-1%"
+REM 修复1：使用小写 pyinstaller 命令
+REM 修复2：合并 -i 和 --icon 参数，使用单一参数格式
+pyinstaller -F -w  --icon=..\resources\icons\max.ico  --distpath ..\dist  --workpath ..\build  ..\src\main.py
 
-:: 激活虚拟环境
-call "%PROJECT_ROOT%\venv\Scripts\activate"
-
-:: 设置资源路径
-set "RESOURCES=%PROJECT_ROOT%\resources"
-set "ICONS=%RESOURCES%\icons"
-set "CONFIGS=%PROJECT_ROOT%\configs"
-set "SRC=%PROJECT_ROOT%\src"
-
-:: 设置构建输出目录
-set "BUILD_PATH=%PROJECT_ROOT%\build"
-set "DIST_PATH=%PROJECT_ROOT%\dist"
-
-:: 创建必要的目录
-if not exist "%BUILD_PATH%" mkdir "%BUILD_PATH%"
-if not exist "%DIST_PATH%" mkdir "%DIST_PATH%"
-if not exist "%RESOURCES%" mkdir "%RESOURCES%"
-if not exist "%ICONS%" mkdir "%ICONS%"
-if not exist "%CONFIGS%" mkdir "%CONFIGS%"
-if not exist "%HOOKS%" mkdir "%HOOKS%"
-
-:: 创建临时图标文件（如果不存在）
-if not exist "%ICONS%\app.ico" (
-    echo 创建临时图标文件...
-    copy NUL "%ICONS%\app.ico" >nul
-)
-
-:: 使用PyInstaller打包
-echo 正在运行 PyInstaller...
-pyinstaller --onefile --noconsole --name "ContestTimer" ^
-  --workpath "%BUILD_PATH%" ^
-  --distpath "%DIST_PATH%" ^
-  --add-data "%RESOURCES%;resources" ^
-  --add-data "%CONFIGS%;configs" ^
-  --additional-hooks-dir "%HOOKS%" ^
-  --hidden-import "pystray._win32" ^
-  --hidden-import "plyer.platforms.win.notification" ^
-  --hidden-import "PIL" ^
-  --hidden-import "bs4" ^
-  --hidden-import "soupsieve" ^
-  "%SRC%\main.py"
-
-:: 检查打包结果
-if exist "%DIST_PATH%\ContestTimer.exe" (
-    echo 打包成功! 可执行文件在 %DIST_PATH%\ContestTimer.exe
-) else (
-    echo 打包失败，请检查错误信息
-)
-
-echo 按任意键退出...
-pause >nul
+REM 删除虚拟环境
+deactivate >nul 2>&1
+rmdir /s /q ..\venv
+echo 虚拟环境已删除。

@@ -1,6 +1,7 @@
+Pyinstaller
 beautifulsoup4==4.12.2
 pytz==2023.3
 requests==2.31.0
 pystray==0.19.4
 plyer==2.1.0
-Pillow==10.0.1  # PIL的正式包名
+Pillow==10.0.1

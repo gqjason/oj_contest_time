@@ -45,10 +45,14 @@ class FileLogger:
         try:
             if not os.path.exists(self.log_dir):
                 os.makedirs(self.log_dir)
+            
         except PermissionError:
+            
             self.log_dir = os.path.join(os.getcwd(), "logs")
             if not os.path.exists(self.log_dir):
                 os.makedirs(self.log_dir)
+                
+        #print(self.log_dir)
     
     def _get_log_path(self, file_name):
         """生成日志文件路径"""
@@ -146,6 +150,8 @@ class FileLogger:
         
         
 if __name__ == "__main__":
-    logger_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
-    print(logger_path)
     pass
+    logger_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+    lo = FileLogger()
+    print(lo.logger_path,lo.log_dir)
+    
