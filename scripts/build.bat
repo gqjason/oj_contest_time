@@ -1,0 +1,9 @@
+@echo off
+echo 正在清理旧构建...
+call clean.bat
+
+echo 正在安装依赖...
+call install.bat
+
+echo 正在打包应用程序...
+python build.py

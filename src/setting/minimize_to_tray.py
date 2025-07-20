@@ -51,7 +51,7 @@ window object does not have 'protocol' method. Make sure to pass a Tkinter windo
         # 创建托盘图标
         # 获取当前项目路径并生成托盘图标
         project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        image_path = os.path.join(project_dir, "resources", "icons","min.png")
+        image_path = os.path.join(project_dir, "resources", "icons","app.ico")
         try:
             image = Image.open(image_path)
         except Exception as e:
