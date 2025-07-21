@@ -28,10 +28,12 @@ class SettingsManager:
 
     @staticmethod
     def get_base_path():
-        """获取项目根路径（支持 PyInstaller 打包和未打包运行）"""
+        """根据是否为打包环境返回配置路径"""
         if getattr(sys, 'frozen', False):
-            return Path(sys.executable).parent
+            # PyInstaller 打包后，使用系统 AppData 路径
+            return Path(os.getcwd()) / "oj_contest_time"
         else:
+            # 调试环境，使用项目目录
             return Path(__file__).resolve().parent.parent
 
     def __init__(self, main_window=None, config_file=None):
@@ -42,10 +44,15 @@ class SettingsManager:
             config_file: 设置文件路径（可选）
         """
         self.main_window = main_window
-        base_path = self.get_base_path()
-        self.config_file = Path(config_file) if config_file else base_path / "configs" / "settings.json"
-        self.settings = self.DEFAULT_SETTINGS.copy()
         self.logger = FileLogger()
+
+        base_path = self.get_base_path()
+        if config_file:
+            self.config_file = Path(config_file)
+        else:
+            self.config_file = base_path / "configs" / "settings.json"
+
+        self.settings = self.DEFAULT_SETTINGS.copy()
         self.load_settings()
 
     def load_settings(self):

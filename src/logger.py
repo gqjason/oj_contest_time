@@ -49,7 +49,7 @@ class FileLogger:
             
         except PermissionError:
             
-            self.log_dir = os.path.join(self.get_base_path(), "logs")
+            self.log_dir = os.path.join(os.getcwd(), "oj_contest_time", "logs")
             if not os.path.exists(self.log_dir):
                 os.makedirs(self.log_dir)
                 
