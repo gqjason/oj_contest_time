@@ -40,7 +40,7 @@ class AutoStartManager:
             key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.key_path)
         with key:
             winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, exe_path)
-        self.logger.info(f"[AutoStartManager] Windows注册表启动项设置为: {exe_path}")
+        self.logger.info(f"[AutoStartManager][_set_windows_autostart] Windows注册表启动项设置为: {exe_path}")
 
     def _disable_autostart(self, system):
         if system == "Windows":

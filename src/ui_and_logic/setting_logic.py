@@ -129,7 +129,7 @@ class SettingsManager:
             minimize_to_tray = self.settings.get("minimize_to_tray", False)
             desktop_notify = self.settings.get("desktop_notify", False)
 
-            # ✅ 合并开机启动逻辑
+            # 合并开机启动逻辑
             try:
                 self.logger.info(f"[{file_name}][{self.class_name}] 正在设置开机自启动和静默启动...")
                 asm.apply(autostart, autostart_minimized)
@@ -138,7 +138,7 @@ class SettingsManager:
                 self.logger.error(f"[{file_name}][{self.class_name}] 开机启动设置失败: {e}")
                 return False
 
-            # ✅ 最小化托盘逻辑
+            # 最小化托盘逻辑
             if self.main_window:
                 if minimize_to_tray:
                     self.logger.info(f"[{file_name}][{self.class_name}] 启用最小化托盘...")
@@ -149,7 +149,7 @@ class SettingsManager:
             else:
                 self.logger.warning(f"[{file_name}][{self.class_name}] 主窗口未设置，跳过最小化托盘设置")
 
-            # ✅ 桌面通知
+            # 桌面通知
             if desktop_notify:
                 self.logger.info(f"[{file_name}][{self.class_name}] 启用桌面通知...")
                 self.switch_system_notification(True)
