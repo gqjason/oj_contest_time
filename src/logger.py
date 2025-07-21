@@ -34,33 +34,23 @@ class FileLogger:
     file_name = f"{get_today_str()}"
 
     def __init__(self, log_level='INFO', max_size=10, backup_count=5):
-        self.log_dir = self.logger_path
-        
+        self.log_dir = self.get_log_dir()
         self.log_level = self.LEVELS[log_level.upper()]
-        self.max_size = max_size * 1024 * 1024  # 转换为字节
+        self.max_size = max_size * 1024 * 1024  # 转为字节
         self.backup_count = backup_count
-        self.log_files = {} 
+        self.log_files = {}
         self.lock = threading.Lock()
-        
-        # 确保日志目录存在，若无权限则回退到当前目录
+
         try:
             if not os.path.exists(self.log_dir):
                 os.makedirs(self.log_dir)
-            
         except PermissionError:
-            
+            # 若 Roaming 无权限，则回退
             self.log_dir = os.path.join(os.getcwd(), "oj_contest_time", "logs")
-            if not os.path.exists(self.log_dir):
-                os.makedirs(self.log_dir)
-                
-        #print(self.log_dir)
+            os.makedirs(self.log_dir, exist_ok=True)
     
-    def get_base_path(self):
-        """获取项目根路径（支持 PyInstaller 打包和未打包运行）"""
-        if getattr(sys, 'frozen', False):  # 如果是打包后的程序
-            return os.path.dirname(sys.executable)
-        else:
-            return os.path.dirname(os.path.abspath(__file__))
+    def get_log_dir(self):
+        return Path(os.getenv("APPDATA")) / "oj_contest_time" / "logs"
     
     def _get_log_path(self, file_name):
         """生成日志文件路径"""

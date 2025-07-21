@@ -26,35 +26,22 @@ class SettingsManager:
         "language": "zh_CN"
     }
 
-    @staticmethod
-    def get_base_path():
-        """根据是否为打包环境返回配置路径"""
-        if getattr(sys, 'frozen', False):
-            # PyInstaller 打包环境，放在用户 AppData 中
-            local_appdata = os.getenv('LOCALAPPDATA', str(Path.home()))
-            return Path(local_appdata) / "oj_contest_time"
-        else:
-            # 调试环境，返回项目根目录
-            return Path(__file__).resolve().parent.parent
-
     def __init__(self, main_window=None, config_file=None):
-        """
-        初始化设置管理器
-        参数:
-            main_window: 主窗口对象
-            config_file: 设置文件路径（可选）
-        """
         self.main_window = main_window
         self.logger = FileLogger()
 
         base_path = self.get_base_path()
-        if config_file:
-            self.config_file = Path(config_file)
-        else:
-            self.config_file = base_path / "configs" / "settings.json"
+        config_dir = base_path / "configs"
+        config_dir.mkdir(parents=True, exist_ok=True)
 
+        self.config_file = Path(config_file) if config_file else config_dir / "settings.json"
         self.settings = self.DEFAULT_SETTINGS.copy()
         self.load_settings()
+
+    @staticmethod
+    def get_base_path():
+        """统一返回 APPDATA/Roaming/oj_contest_time 路径"""
+        return Path(os.getenv("APPDATA")) / "oj_contest_time"
 
     def load_settings(self):
         """从配置文件加载设置"""
