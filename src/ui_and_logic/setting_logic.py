@@ -26,16 +26,16 @@ class SettingsManager:
         "language": "zh_CN"
     }
 
-@staticmethod
-def get_base_path():
-    """根据是否为打包环境返回配置路径"""
-    if getattr(sys, 'frozen', False):
-        # PyInstaller 打包环境，放在用户 AppData 中
-        local_appdata = os.getenv('LOCALAPPDATA', str(Path.home()))
-        return Path(local_appdata) / "oj_contest_time"
-    else:
-        # 调试环境，返回项目根目录
-        return Path(__file__).resolve().parent.parent
+    @staticmethod
+    def get_base_path():
+        """根据是否为打包环境返回配置路径"""
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 打包环境，放在用户 AppData 中
+            local_appdata = os.getenv('LOCALAPPDATA', str(Path.home()))
+            return Path(local_appdata) / "oj_contest_time"
+        else:
+            # 调试环境，返回项目根目录
+            return Path(__file__).resolve().parent.parent
 
     def __init__(self, main_window=None, config_file=None):
         """
