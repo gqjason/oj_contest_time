@@ -49,13 +49,12 @@ class FileLogger:
             
         except PermissionError:
             
-            self.log_dir = os.path.join(self.get_base_path, "logs")
+            self.log_dir = os.path.join(self.get_base_path(), "logs")
             if not os.path.exists(self.log_dir):
                 os.makedirs(self.log_dir)
                 
         #print(self.log_dir)
     
-    @staticmethod
     def get_base_path(self):
         """获取项目根路径（支持 PyInstaller 打包和未打包运行）"""
         if getattr(sys, 'frozen', False):  # 如果是打包后的程序
