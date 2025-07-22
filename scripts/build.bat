@@ -2,6 +2,10 @@
 REM 清理旧文件
 call clean.bat
 
+REM 删除虚拟环境
+deactivate >nul 2>&1
+rmdir /s /q ..\venv
+
 REM 检查 Python 是否可用
 python --version >nul 2>&1
 if errorlevel 1 (

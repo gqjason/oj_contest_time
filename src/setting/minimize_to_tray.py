@@ -1,4 +1,4 @@
-# minimize_to_tray.py
+# setting/minimize_to_tray.py
 import pystray
 from PIL import Image
 import threading
@@ -8,51 +8,58 @@ from logger import FileLogger
 file_name = "minimize_to_tray.py"
 
 class MinimizeToTray:
-    class_name = "MinimizeToTray"
-
-    def __init__(self, window):
+    def __init__(self, window, lock=None, lock_file_path=None):
         self.window = window
         self.tray_icon = None
         self.logger = FileLogger()
+        self.lock = lock
+        self.lock_file_path = lock_file_path
 
-    def disable_running(self):
-        if hasattr(self.window, "protocol"):
-            self.window.protocol("WM_DELETE_WINDOW", self.window.destroy)
+    def enable(self):
+        """拦截关闭，隐藏到托盘"""
+        self.window.protocol("WM_DELETE_WINDOW", self.hide_to_tray)
 
-    def enable_running(self):
-        if hasattr(self.window, "protocol"):
-            self.window.protocol("WM_DELETE_WINDOW", self.on_close)
+    def hide_to_tray(self):
+        """隐藏窗口并创建托盘图标"""
+        self.window.withdraw()
+        self._create_tray_icon()
 
-    def create_tray_icon(self):
-        if self.tray_icon is not None:
-            return  # 已创建则不重复
+    def _create_tray_icon(self):
+        if self.tray_icon:
+            return
 
-        def on_tray_icon_clicked(icon, item):
-            self.window.deiconify()
+        def on_show(icon, item):
+            self.window.after(0, self.window.deiconify)
             icon.stop()
             self.tray_icon = None
-            self.create_tray_icon()  # 重新生成托盘图标（保持在右下角）
 
-        project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        image_path = os.path.join(project_dir, "resources", "icons", "app.ico")
+        def on_exit(icon, item):
+            # 退出前释放锁并删锁文件
+            if self.lock:
+                try: 
+                    self.lock.release()
+                except: 
+                    pass
+                try:
+                    os.remove(self.lock_file_path)
+                except:
+                    pass
+
+            self.window.after(0, self.window.destroy)
+            icon.stop()
+
+        # 图标文件
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        icon_path = os.path.join(base_dir, "..", "resources", "icons", "app.ico")
         try:
-            image = Image.open(image_path)
+            image = Image.open(icon_path)
         except Exception as e:
-            self.logger.error(f"[MinimizeToTray] Failed to load tray icon: {e}")
-            image = Image.new('RGB', (64, 64), color=(255, 255, 255)) # type: ignore
+            self.logger.error(f"[{file_name}] 图标加载失败: {e}")
+            image = Image.new("RGB", (64, 64), (255,255,255))
 
-        icon = pystray.Icon(
-            "minimize_to_tray",
-            image,
-            "竞赛提醒工具",
-            menu=pystray.Menu(
-                pystray.MenuItem("显示窗口", on_tray_icon_clicked),
-                pystray.MenuItem("退出", lambda: self.window.destroy())
-            )
+        menu = pystray.Menu(
+            pystray.MenuItem("显示窗口", on_show),
+            pystray.MenuItem("退出", on_exit)
         )
-        threading.Thread(target=icon.run, daemon=True).start()
-        self.tray_icon = icon
-
-    def on_close(self):
-        self.window.withdraw()
-        self.create_tray_icon()
+        self.tray_icon = pystray.Icon("tray_icon", image, "竞赛提醒工具", menu)
+        threading.Thread(target=self.tray_icon.run, daemon=True).start()

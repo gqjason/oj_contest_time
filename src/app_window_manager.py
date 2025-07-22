@@ -10,39 +10,31 @@ from setting.minimize_to_tray import MinimizeToTray
 from logger import FileLogger
 
 class AppWindowManager:
-    def __init__(self):
+    def __init__(self, lock, lock_file_path):
         self.logger = FileLogger()
         self.root = tk.Tk()
         self.app_logic = AppLogic()
         self.app_ui = AppUI(self.root, self.app_logic)
-        self.tray_manager = MinimizeToTray(self.root)
         self.settings = self.load_settings()
 
+        # 将锁传给托盘管理
+        self.tray_manager = MinimizeToTray(self.root, lock, lock_file_path)
+
     def load_settings(self):
-        config_path = os.path.join(os.path.dirname(__file__), "..", "config", "settings.json")
+        cfg = os.path.join(os.path.dirname(__file__), "..", "config", "settings.json")
         try:
-            with open(config_path, "r", encoding="utf-8") as f:
+            with open(cfg, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
-            self.logger.error(f"[AppWindowManager] 无法加载设置: {e}")
+            self.logger.error(f"[AppWindowManager] 加载设置失败: {e}")
             return {}
 
-    def apply_tray_setting(self):
-        if self.settings.get("minimize_to_tray", False):
-            self.tray_manager.enable_running()
-        else:
-            self.tray_manager.disable_running()
-
     def run(self):
-        should_hide = "--hidden" in sys.argv or self.settings.get("autostart_minimize", False)
+        # 无论何时都拦截关闭到托盘
+        self.tray_manager.enable()
 
-        # 始终启用托盘（无论是否隐藏窗口）
-        self.tray_manager.enable_running()
-        self.tray_manager.create_tray_icon()  # 主动创建托盘图标
-
-        if should_hide:
-            self.root.withdraw()
+        # 程序一启动就隐藏并显示托盘
+        self.root.withdraw()
+        self.tray_manager.hide_to_tray()
 
         self.root.mainloop()
-
-
