@@ -14,7 +14,9 @@ class MinimizeToTray:
     def __init__(self, window):
         self.window = window
         self.tray_icon = None
-        self.logger  = FileLogger()
+        self.logger = FileLogger()
+        self.enable_running()  # ✅ 确保始终拦截关闭事件
+
 
     def disable_running(self):
         if hasattr(self.window, "protocol"):
