@@ -31,11 +31,12 @@ REM 打包主程序
 pyinstaller -F -w ^
 --icon=..\resources\icons\max.ico ^
 --add-data "..\configs;configs" ^
---add-data "..\resources\icons;resources\icons" ^
+--add-data "..\resources\icons;resources/icons" ^
 --distpath ..\dist ^
 --workpath ..\build ^
 --specpath ..\scripts ^
 ..\src\main.py
+
 
 REM 删除虚拟环境
 deactivate >nul 2>&1

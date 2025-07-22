@@ -1,51 +1,54 @@
 import pystray
-from pystray import MenuItem as item
 from PIL import Image
 import threading
 import os
 import sys
 from logger import FileLogger
+import tkinter as tk
 
 file_name = "minimize_to_tray.py"
+
+def get_resource_path(relative_path):
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 class MinimizeToTray:
     class_name = "MinimizeToTray"
 
-    def __init__(self, window):
+    def __init__(self, window: tk.Tk):
         self.window = window
         self.tray_icon = None
-        self.icon_thread = None
         self.logger = FileLogger()
 
-        # 图标路径
-        self.icon_path = os.path.join(os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__), "resources", "icons", "app.ico")
-
-    def enable_running(self):
-        try:
-            image = Image.open(self.icon_path)
-
-            menu = (
-                item('显示窗口', self.show_window),
-                item('退出程序', self.exit_program)
-            )
-            self.tray_icon = pystray.Icon("AppTray", image, "程序正在后台运行", menu)
-
-            self.icon_thread = threading.Thread(target=self.tray_icon.run, daemon=True)
-            self.icon_thread.start()
-        except Exception as e:
-            self.logger.error(f"[托盘图标] 初始化失败: {e}")
-            
-    def disable_running(self):
-        if self.tray_icon:
-            self.tray_icon.stop()
-
-    def show_window(self, icon, item):
+    def on_show(self, icon, item):
         self.window.after(0, self.window.deiconify)
 
-    def exit_program(self, icon, item):
-        self.disable_running()
+    def on_quit(self, icon, item):
+        self.logger.info(f"[{file_name}][{self.class_name}] 退出程序")
+        icon.stop()
         self.window.after(0, self.window.destroy)
 
-    def cleanup(self):
-        if self.tray_icon:
-            self.tray_icon.stop()
+    def on_close(self):
+        """关闭窗口时最小化到托盘"""
+        self.window.withdraw()
+        if not self.tray_icon:
+            self.create_tray_icon()
+
+    def create_tray_icon(self):
+        icon_path = get_resource_path("resources/icons/app.ico")
+        image = Image.open(icon_path)
+        menu = pystray.Menu(
+            pystray.MenuItem("显示", self.on_show),
+            pystray.MenuItem("退出", self.on_quit)
+        )
+        self.tray_icon = pystray.Icon("App", image, "应用正在后台运行", menu)
+        threading.Thread(target=self.tray_icon.run, daemon=True).start()
+
+    def enable_running(self):
+        self.window.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def disable_running(self):
+        self.window.protocol("WM_DELETE_WINDOW", self.window.destroy)
