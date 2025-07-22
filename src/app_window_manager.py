@@ -2,6 +2,7 @@ import tkinter as tk
 import json
 import os
 import sys
+from pathlib import Path
 from filelock import FileLock, Timeout
 import tempfile
 
@@ -31,8 +32,12 @@ class AppWindowManager:
         self.logger = FileLogger()
         self.root = tk.Tk()
 
+        base_path = self.get_base_path()
+        config_dir = base_path / "configs"
+        self.config_file =  config_dir / "settings.json"
+
         self.settings = self.load_settings()
-        self.minimize_to_tray = self.settings.get("minimize_to_tray", True)
+        self.minimize_to_tray = self.settings.get("minimize_to_tray")
 
         # 初始化逻辑和UI
         self.app_logic = AppLogic()
@@ -44,18 +49,25 @@ class AppWindowManager:
             self.tray.enable_running()
         else:
             self.tray.disable_running()
+            
+        self.logger.info(f"[{file_name}][{self.class_name}] self.minimize_to_tray 为 {self.minimize_to_tray}")
 
         # 拦截关闭按钮
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
+    @staticmethod
+    def get_base_path():
+        return Path.home() / "oj_contest_time"
+    
     def load_settings(self):
         try:
-            with open("settings.json", "r", encoding="utf-8") as f:
+            with open(self.config_file, "r", encoding="utf-8") as f:
+                self.logger.debug(f"[{file_name}][{self.class_name}] 文件路径为: {os.path.abspath('settings.json')}")
                 return json.load(f)
         except Exception as e:
             self.logger.error(f"[{file_name}][{self.class_name}] 加载设置失败: {e}")
             return {}
-
+    
     def on_close(self):
         if self.minimize_to_tray:
             self.logger.info(f"[{file_name}][{self.class_name}] 窗口隐藏，托盘运行")
