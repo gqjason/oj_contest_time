@@ -1,4 +1,7 @@
+import os
 import json
+import platform
+import subprocess
 from pathlib import Path
 
 from setting.minimize_to_tray import MinimizeToTray as MTT
@@ -28,6 +31,7 @@ class SettingsManager:
         config_dir = base_path / "configs"
         config_dir.mkdir(parents=True, exist_ok=True)
 
+        self.config_path = Path(config_file) if config_file else config_dir
         self.config_file = Path(config_file) if config_file else config_dir / "settings.json"
         self.settings = self.DEFAULT_SETTINGS.copy()
         self.load_settings()
@@ -165,6 +169,24 @@ class SettingsManager:
                 pass
             except Exception as e:
                 self.logger.error(f"发送通知失败: {e}")
+                
+          
+    def open_folder_in_explorer(self, path: str):
+        """在操作系统的文件资源管理器中打开指定目录"""
+        if not os.path.exists(path):
+            self.logger.warning(f"[{file_name}][{self.class_name}][open_folder_in_explorer] 路径不存在: {path}")
+            return
+        
+        system = platform.system()
+        try:
+            if system == "Windows":
+                os.startfile(path)
+            elif system == "Darwin":  # macOS
+                subprocess.run(["open", path])
+            else:  # Linux
+                subprocess.run(["xdg-open", path])
+        except Exception as e:
+            self.logger.error(f"[{file_name}][{self.class_name}][open_folder_in_explorer] 打开文件夹失败: {e}")
 
 if __name__ == "__main__":
     pass

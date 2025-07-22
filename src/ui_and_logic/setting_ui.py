@@ -60,6 +60,11 @@ class SettingsDialog:
         notebook.add(notify_frame, text="通知设置")
         self.create_notify_frame(notify_frame)
         
+        # 配置目录选项卡
+        directory_frame = ttk.Frame(notebook,padding=10)
+        notebook.add(directory_frame, text="配置目录")
+        self.create_file_directory_frame(directory_frame)
+        
         # 保存按钮
         save_button = ttk.Button(
             button_frame,
@@ -185,24 +190,47 @@ class SettingsDialog:
         )
         minimize_to_tray_check.pack(anchor="w", pady=2)
 
-
-        
     def create_notify_frame(self, frame):
         # 桌面提示选项
-        
         self.desktop_notify_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["desktop_notify"])
         desktop_notify_check = ttk.Checkbutton(
             frame,
-            text="启用desktop通知提示\n（将会开启定时通知）",
+            text="启用桌面右下角通知提示\n（将会开启定时通知）",
             variable=self.desktop_notify_var
         )
         desktop_notify_check.pack(anchor="w", pady=2)
         
+    def create_file_directory_frame(self, frame):
+        
+        
+        
+        self.open_config_directory_button = tk.Button(
+            frame,
+            text="配置目录",
+            command=self.open_config_file,
+            width=15,
+            height=1
+        )
+        self.open_config_directory_button.place(x=5, y=0)  # 靠左上角，偏移10像素
+
+        # 日志目录按钮（在下方）
+        self.open_logs_directory_button = tk.Button(
+            frame,
+            text="日志目录",
+            command=self.open_logs_file,
+            width=15,
+            height=1
+        )
+        self.open_logs_directory_button.place(x=5, y=35)  # y坐标向下偏移，按钮之间大概40像素
+    
+
+    def open_config_file(self):
+        target_config_path = self.settings_manager.config_path
+        self.settings_manager.open_folder_in_explorer(target_config_path)
+        
+    def open_logs_file(self):
+        target_logs_path = self.logger.log_dir
+        self.settings_manager.open_folder_in_explorer(target_logs_path)
+        
         
 
-       
-        
-        
-        
-    def pr(self, a):
-        print(a)
