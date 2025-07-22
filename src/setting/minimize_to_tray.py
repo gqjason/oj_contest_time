@@ -1,4 +1,5 @@
 import pystray
+from pystray import MenuItem as item
 from PIL import Image
 import threading
 import os
@@ -13,37 +14,37 @@ class MinimizeToTray:
     def __init__(self, window):
         self.window = window
         self.tray_icon = None
+        self.icon_thread = None
         self.logger = FileLogger()
-        self.icon_path = os.path.join("resources", "icons", "app.ico")
+
+        # 图标路径
+        self.icon_path = os.path.join(os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__), "resources", "icons", "app.ico")
 
     def enable_running(self):
         try:
             image = Image.open(self.icon_path)
-            self.tray_icon = pystray.Icon("AppName", image, "AppName", menu=pystray.Menu(
-                pystray.MenuItem("显示窗口", self.on_show_window),
-                pystray.MenuItem("退出程序", self.on_exit_program)
-            ))
-            threading.Thread(target=self.tray_icon.run, daemon=True).start()
-            self.logger.info(f"[{file_name}][{self.class_name}] 启用托盘图标")
-        except Exception as e:
-            self.logger.error(f"[{file_name}][{self.class_name}] 启动托盘失败: {e}")
 
+            menu = (
+                item('显示窗口', self.show_window),
+                item('退出程序', self.exit_program)
+            )
+            self.tray_icon = pystray.Icon("AppTray", image, "程序正在后台运行", menu)
+
+            self.icon_thread = threading.Thread(target=self.tray_icon.run, daemon=True)
+            self.icon_thread.start()
+        except Exception as e:
+            self.logger.error(f"[托盘图标] 初始化失败: {e}")
+            
     def disable_running(self):
         if self.tray_icon:
             self.tray_icon.stop()
-            self.tray_icon = None
-            self.logger.info(f"[{file_name}][{self.class_name}] 停止托盘图标")
 
-    def on_show_window(self, icon, item):
-        if self.window:
-            self.logger.info(f"[{file_name}][{self.class_name}] 还原窗口")
-            self.window.after(0, self.window.deiconify)
+    def show_window(self, icon, item):
+        self.window.after(0, self.window.deiconify)
 
-    def on_exit_program(self, icon, item):
-        self.logger.info(f"[{file_name}][{self.class_name}] 托盘退出")
-        self.cleanup()
-        self.window.destroy()
-        sys.exit()
+    def exit_program(self, icon, item):
+        self.disable_running()
+        self.window.after(0, self.window.destroy)
 
     def cleanup(self):
         if self.tray_icon:

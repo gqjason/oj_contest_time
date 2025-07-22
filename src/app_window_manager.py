@@ -2,6 +2,8 @@ import tkinter as tk
 import json
 import os
 import sys
+from filelock import FileLock, Timeout
+import tempfile
 
 from setting.minimize_to_tray import MinimizeToTray
 from logger import FileLogger
@@ -10,6 +12,17 @@ from ui_and_logic.main_ui import AppUI
 from ui_and_logic.main_logic import AppLogic
 
 file_name = "app_window_manager.py"
+
+LOCK_FILE = os.path.join(tempfile.gettempdir(), "oj_contest_time.lock")
+lock = FileLock(LOCK_FILE, timeout=0)
+
+try:
+    lock.acquire(timeout=0)
+except Timeout:
+    # 已有程序在运行
+    import tkinter.messagebox as messagebox
+    messagebox.showwarning("程序已在运行", "检测到已有程序实例正在运行。")
+    sys.exit(0)
 
 class AppWindowManager:
     class_name = "AppWindowManager"
@@ -51,7 +64,8 @@ class AppWindowManager:
             self.logger.info(f"[{file_name}][{self.class_name}] 正常退出")
             self.tray.cleanup()
             self.root.destroy()
-            sys.exit()
+            sys.exit(0)  # 确保干净退出
+
 
     def run(self):
         self.root.mainloop()
