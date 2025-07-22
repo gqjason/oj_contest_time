@@ -1,8 +1,7 @@
-# app/logic.py
 import threading
 import time
 
-from information.capture import CaptureAllInformation
+from information.capture import CaptureAllInformation as CAI
 from .setting_logic import SettingsManager
 
 class AppLogic:
@@ -12,18 +11,19 @@ class AppLogic:
         self.settings_manager = SettingsManager()  # 创建设置管理实例
         self.ui_callback = ui_callback  # UI更新回调函数
         self.running = False
+        self.cai = CAI()
     
-    def get_config(self):
-        """获取当前配置"""
-        return self.settings_manager.get_config()
+    # def get_config(self):
+    #     """获取当前配置"""
+    #     return self.settings_manager.get_config()
     
-    def save_config(self, new_config):
-        """保存新配置"""
-        return self.settings_manager.save_config(new_config)
+    # def save_config(self, new_config):
+    #     """保存新配置"""
+    #     return self.settings_manager.save_config(new_config)
     
-    def get_platforms(self):
-        """获取监控平台列表"""
-        return self.settings_manager.get_platforms()
+    # def get_platforms(self):
+    #     """获取监控平台列表"""
+    #     return self.settings_manager.get_platforms()
         
         
 
@@ -61,7 +61,7 @@ class AppLogic:
             self._update_ui("")
             self._update_ui("> 正在获取比赛数据...\n")
 
-            today_contest = CaptureAllInformation.return_today_upcoming_contest()
+            today_contest = self.cai.return_today_upcoming_contest()
             self._update_ui("[OJ_Bot]\n", clear=True)
             
             if not today_contest:
@@ -88,7 +88,7 @@ class AppLogic:
             self._update_ui("")
             self._update_ui("> 正在获取比赛数据...\n")
 
-            upcoming_contest = CaptureAllInformation.return_all_upcoming_contest()
+            upcoming_contest = self.cai.return_all_upcoming_contest()
             self._update_ui("[OJ_Bot]\n", clear=True)
             
             if not upcoming_contest:

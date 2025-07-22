@@ -5,7 +5,10 @@ from datetime import datetime, timedelta, timezone
 
 class CaptureAllInformation:
     
-    def get_all_website():
+    def __init__(self):
+        pass
+    
+    def get_all_website(self):
         gnc = get_nowcoder()
         gat = get_atcoder()
         gcf = get_codeforces()
@@ -16,9 +19,9 @@ class CaptureAllInformation:
         
         return res
     
-    def get_upcoming_contests():
+    def get_upcoming_contests(self):
         # 获取所有比赛
-        res = CaptureAllInformation.get_all_website()
+        res = self.get_all_website()
         
         # 确保所有时间都是时区感知的 UTC 时间
         for contest in res:
@@ -30,7 +33,7 @@ class CaptureAllInformation:
         res.sort(key=lambda x: x['start_time'])
         return res
         
-    def filter_today_competition(res):
+    def filter_today_competition(self, res):
         # 获取当前 UTC 时间（时区感知）
         now_utc = datetime.now().astimezone()
     
@@ -60,17 +63,17 @@ class CaptureAllInformation:
         
         return upcoming_today
 
-    def return_today_upcoming_contest():
+    def return_today_upcoming_contest(self):
         
-        upcoming_contest = CaptureAllInformation.get_upcoming_contests()
-        today_contest = CaptureAllInformation.filter_today_competition(upcoming_contest)
+        upcoming_contest = self.get_upcoming_contests()
+        today_contest = self.filter_today_competition(upcoming_contest)
         return today_contest
     
-    def return_all_upcoming_contest():
-        upcoming_contest = CaptureAllInformation.get_upcoming_contests()
+    def return_all_upcoming_contest(self):
+        upcoming_contest = self.get_upcoming_contests()
         return upcoming_contest
 
     
 if __name__ == '__main__':
     pass
-    CaptureAllInformation.run()
+    

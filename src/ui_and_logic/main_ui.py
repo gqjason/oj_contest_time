@@ -1,7 +1,5 @@
-# app/ui.py
 import tkinter as tk
 from tkinter import scrolledtext, ttk, messagebox
-import threading
 
 from .setting_ui import SettingsDialog
 from .setting_logic import SettingsManager

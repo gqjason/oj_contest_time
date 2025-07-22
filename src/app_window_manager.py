@@ -1,4 +1,3 @@
-# app/app_window_manager.py
 import tkinter as tk
 import sys
 import json

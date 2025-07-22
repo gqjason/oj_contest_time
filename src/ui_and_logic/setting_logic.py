@@ -1,10 +1,4 @@
 import json
-import sys
-import os
-import logging
-import platform
-import datetime
-import random
 from pathlib import Path
 
 from setting.minimize_to_tray import MinimizeToTray as MTT
@@ -40,8 +34,8 @@ class SettingsManager:
 
     @staticmethod
     def get_base_path():
-        """统一返回 APPDATA/Roaming/oj_contest_time 路径"""
-        return Path(os.getenv("APPDATA")) / "oj_contest_time"
+        return Path.home() / "oj_contest_time"
+
 
     def load_settings(self):
         """从配置文件加载设置"""

@@ -1,4 +1,3 @@
-import sys
 import os
 import threading
 from datetime import datetime
@@ -50,8 +49,8 @@ class FileLogger:
             os.makedirs(self.log_dir, exist_ok=True)
     
     def get_log_dir(self):
-        return Path(os.getenv("APPDATA")) / "oj_contest_time" / "logs"
-    
+        return Path.home() / "oj_contest_time" / "logs"
+
     def _get_log_path(self, file_name):
         """生成日志文件路径"""
         return os.path.join(self.log_dir, f"{file_name}.log")
