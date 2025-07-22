@@ -1,3 +1,4 @@
+# app/app_window_manager.py
 import tkinter as tk
 import sys
 import json
@@ -21,8 +22,7 @@ class AppWindowManager:
         config_path = os.path.join(os.path.dirname(__file__), "..", "config", "settings.json")
         try:
             with open(config_path, "r", encoding="utf-8") as f:
-                settings = json.load(f)
-                return settings
+                return json.load(f)
         except Exception as e:
             self.logger.error(f"[AppWindowManager] 无法加载设置: {e}")
             return {}
@@ -34,10 +34,11 @@ class AppWindowManager:
             self.tray_manager.disable_running()
 
     def run(self):
-        # 如果命令行参数中含有 --hidden 或设置中开启了 autostart_minimize，则启动后隐藏
         should_hide = "--hidden" in sys.argv or self.settings.get("autostart_minimize", False)
         if should_hide:
             self.root.withdraw()
+            self.tray_manager.on_close()  # 👈 自动最小化到托盘
+        else:
+            self.apply_tray_setting()
 
-        self.apply_tray_setting()
         self.root.mainloop()
