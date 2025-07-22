@@ -1,23 +1,48 @@
+import json
+from datetime import datetime, timedelta, timezone
+
 from .capture_nowcoder import get_nowcoder
 from .capture_atcoder import get_atcoder
 from .capture_codeforces import get_codeforces
-from datetime import datetime, timedelta, timezone
+from setting.get_configs_and_logs_path import GetAllPath as GAP
+from logger import FileLogger
 
+file_name = "capture.py"
 class CaptureAllInformation:
+    class_name = "CaptureAllInformation"
     
     def __init__(self):
-        pass
+        self.config_path = GAP().get_settings_path()
+        self.logger = FileLogger(log_level="DEBUG")
+        self.setting = self.load_settings()
+        
+    def load_settings(self):
+        try:
+            with open(self.config_path, "r", encoding="utf-8") as f:
+                self.logger.info(f"[{file_name}][{self.class_name}] 文件路径: {self.config_path}")
+                return json.load(f)
+        except Exception as e:
+            self.logger.error(f"[AppWindowManager] 无法加载设置: {e}")
+            return {}
     
     def get_all_website(self):
         gnc = get_nowcoder()
         gat = get_atcoder()
         gcf = get_codeforces()
+        
         res = []
-        res += gnc.get_nc()
-        res += gcf.get_cf()
-        res += gat.get_ac()
+        res += gcf.get_cf() if self.is_capture_contest("is_capture_codeforces") else []        
+        res += gnc.get_nc() if self.is_capture_contest("is_capture_nowcoder") else []
+        res += gat.get_ac() if self.is_capture_contest("is_capture_atcoder") else []
+        
+        self.logger.debug(f"[{file_name}][{self.class_name}] cf: {self.is_capture_contest("is_capture_codeforces")}")
+        self.logger.debug(f"[{file_name}][{self.class_name}] nk: {self.is_capture_contest("is_capture_nowcoder")}")
+        self.logger.debug(f"[{file_name}][{self.class_name}] at: {self.is_capture_contest("is_capture_atcoder")}")
         
         return res
+    
+    def is_capture_contest(self, key):
+        return self.setting.get(key)
     
     def get_upcoming_contests(self):
         # 获取所有比赛

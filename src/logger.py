@@ -4,6 +4,8 @@ from datetime import datetime
 from tkinter import ttk, messagebox
 from pathlib import Path
 
+from setting.get_configs_and_logs_path import GetAllPath as GAP
+
 class FileLogger:
     """
     多文件日志记录器，支持不同日志级别和日志分割
@@ -33,7 +35,7 @@ class FileLogger:
     file_name = f"{get_today_str()}"
 
     def __init__(self, log_level='INFO', max_size=10, backup_count=5):
-        self.log_dir = self.get_log_dir()
+        self.log_dir = GAP().get_logs_path()
         self.log_level = self.LEVELS[log_level.upper()]
         self.max_size = max_size * 1024 * 1024  # 转为字节
         self.backup_count = backup_count
@@ -48,8 +50,6 @@ class FileLogger:
             self.log_dir = os.path.join(os.getcwd(), "oj_contest_time", "logs")
             os.makedirs(self.log_dir, exist_ok=True)
     
-    def get_log_dir(self):
-        return Path.home() / "oj_contest_time" / "logs"
 
     def _get_log_path(self, file_name):
         """生成日志文件路径"""

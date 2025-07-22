@@ -6,6 +6,7 @@ from pathlib import Path
 
 from setting.minimize_to_tray import MinimizeToTray as MTT
 from setting.autostart_manager import AutoStartManager as ASM
+from setting.get_configs_and_logs_path import GetAllPath as GAP
 from logger import FileLogger
 
 file_name = "setting_logic.py"
@@ -18,27 +19,22 @@ class SettingsManager:
         "minimize_to_tray": False,
         "autostart_minimize": False,
         "desktop_notify": False,
-        "notify_receiver_email": "",
+
         "theme": "light",
-        "language": "zh_CN"
+        "language": "zh_CN",
+        
+        "is_capture_codeforces": False,
+        "is_capture_nowcoder": False,
+        "is_capture_atcoder": False,
     }
 
     def __init__(self, main_window=None, config_file=None):
         self.main_window = main_window
         self.logger = FileLogger()
 
-        base_path = self.get_base_path()
-        config_dir = base_path / "configs"
-        config_dir.mkdir(parents=True, exist_ok=True)
-
-        self.config_path = Path(config_file) if config_file else config_dir
-        self.config_file = Path(config_file) if config_file else config_dir / "settings.json"
+        self.config_file = GAP().get_settings_path()
         self.settings = self.DEFAULT_SETTINGS.copy()
         self.load_settings()
-
-    @staticmethod
-    def get_base_path():
-        return Path.home() / "oj_contest_time"
 
 
     def load_settings(self):
@@ -95,6 +91,12 @@ class SettingsManager:
         ui_instance.minimize_to_tray_var.set(self.get_setting("minimize_to_tray"))
         ui_instance.autostart_minimize_var.set(self.get_setting("autostart_minimize"))
         ui_instance.desktop_notify_var.set(self.get_setting("desktop_notify"))
+        
+        ui_instance.capturing_codeforces.set(self.get_setting("is_capture_codeforces"))
+        ui_instance.capturing_nowcoder.set(self.get_setting("is_capture_nowcoder"))
+        ui_instance.capturing_atcoder.set(self.get_setting("is_capture_atcoder"))
+        
+        
 
     def handle_save(self, ui_instance):
         """处理保存按钮点击事件"""
@@ -103,7 +105,13 @@ class SettingsManager:
             "minimize_to_tray": ui_instance.minimize_to_tray_var.get(),
             "autostart_minimize": ui_instance.autostart_minimize_var.get(),
             "desktop_notify": ui_instance.desktop_notify_var.get(),
+            
+            "is_capture_codeforces": ui_instance.capturing_codeforces.get(),
+            "is_capture_nowcoder": ui_instance.capturing_nowcoder.get(),
+            "is_capture_atcoder": ui_instance.capturing_atcoder.get(),
+            
         }
+        
         self.update_settings(**settings_data)
         if self.save_settings():
             if self.apply_system_settings():
@@ -112,7 +120,7 @@ class SettingsManager:
 
 
     def apply_system_settings(self):
-        mtt = MTT(self.main_window)
+        mtt = MTT(self.main_window) # type: ignore
         asm = ASM()
         try:
             self.logger.info(f"[{file_name}][{self.class_name}] 正在应用系统设置...")
