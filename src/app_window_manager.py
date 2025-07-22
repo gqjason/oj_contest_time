@@ -35,10 +35,15 @@ class AppWindowManager:
 
     def run(self):
         should_hide = "--hidden" in sys.argv or self.settings.get("autostart_minimize", False)
+
+        # ✅ 无论显示或隐藏，都要启用托盘功能
+        self.tray_manager.enable_running()
+
         if should_hide:
             self.root.withdraw()
-            self.tray_manager.on_close()  # 👈 自动最小化到托盘
-        else:
-            self.apply_tray_setting()
+            self.tray_manager.on_close()  # 主动托盘图标初始化
+        # else:
+        #     self.tray_manager.enable_running()  # ✅ 此行已统一提前调用
 
         self.root.mainloop()
+
