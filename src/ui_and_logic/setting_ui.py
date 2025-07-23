@@ -200,30 +200,30 @@ class SettingsDialog:
 
     # 比赛设置
     def create_contest_settings(self, frame):
-        # cf
-        self.capturing_codeforces = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_codeforces"])
-        capture_codeforces = ttk.Checkbutton(
+        # codeforces
+        self.capturing_codeforces_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_codeforces"])
+        capture_codeforces_check = ttk.Checkbutton(
             frame,
             text="codeforces",
-            variable=self.capturing_codeforces
+            variable=self.capturing_codeforces_var
         )
-        capture_codeforces.pack(anchor="w", pady=2)
+        capture_codeforces_check.pack(anchor="w", pady=2)
         # 牛客
-        self.capturing_nowcoder = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_nowcoder"])
-        capture_nowcoder = ttk.Checkbutton(
+        self.capturing_nowcoder_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_nowcoder"])
+        capture_nowcoder_check = ttk.Checkbutton(
             frame,
             text="牛客",
-            variable=self.capturing_nowcoder
+            variable=self.capturing_nowcoder_var
         )
-        capture_nowcoder.pack(anchor="w", pady=2)
+        capture_nowcoder_check.pack(anchor="w", pady=2)
         # atcoder
-        self.capturing_atcoder = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_atcoder"])
-        capture_atcoder = ttk.Checkbutton(
+        self.capturing_atcoder_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_atcoder"])
+        capture_atcoder_check = ttk.Checkbutton(
             frame,
             text="atcoder",
-            variable=self.capturing_atcoder,
+            variable=self.capturing_atcoder_var,
         )
-        capture_atcoder.pack(anchor="w", pady=2)
+        capture_atcoder_check.pack(anchor="w", pady=2)
         
     # 通知设置
     def create_notify_frame(self, frame):
@@ -235,6 +235,35 @@ class SettingsDialog:
             variable=self.desktop_notify_var
         )
         desktop_notify_check.pack(anchor="w", pady=2)
+        
+        choice_contest_text = ttk.Label(
+            text= "选择你要通知的比赛",
+            foreground="#7f8c8d"
+        )
+        # codeforces
+        self.notify_codeforces_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_notify_codeforces"])
+        notify_codeforces_check = ttk.Checkbutton(
+            frame,
+            text="codeforces",
+            variable=self.notify_codeforces_var
+        )
+        notify_codeforces_check.pack(anchor="w", pady=2)
+        # 牛客
+        self.notify_nowcoder_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_notify_nowcoder"])
+        notify_nowcoder_check = ttk.Checkbutton(
+            frame,
+            text="牛客",
+            variable=self.notify_nowcoder_var
+        )
+        notify_nowcoder_check.pack(anchor="w", pady=2)
+        # atcoder
+        self.notify_atcoder_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_notify_atcoder"])
+        notify_atcoder_check = ttk.Checkbutton(
+            frame,
+            text="atcoder",
+            variable=self.notify_atcoder_var,
+        )
+        notify_atcoder_check.pack(anchor="w", pady=2)
         
     # 目录设置
     def create_file_directory_frame(self, frame):

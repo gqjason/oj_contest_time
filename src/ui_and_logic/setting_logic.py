@@ -18,14 +18,16 @@ class SettingsManager:
         "autostart": False,
         "minimize_to_tray": False,
         "autostart_minimize": False,
-        "desktop_notify": False,
-
-        "theme": "light",
-        "language": "zh_CN",
         
         "is_capture_codeforces": False,
         "is_capture_nowcoder": False,
         "is_capture_atcoder": False,
+        
+        "desktop_notify": False,
+        "is_notify_codeforces": False,
+        "is_notify_nowcoder": False,
+        "is_notify_atcoder": False,
+        
     }
 
     def __init__(self, main_window=None, config_file=None):
@@ -90,12 +92,15 @@ class SettingsManager:
         ui_instance.autostart_var.set(self.get_setting("autostart"))
         ui_instance.minimize_to_tray_var.set(self.get_setting("minimize_to_tray"))
         ui_instance.autostart_minimize_var.set(self.get_setting("autostart_minimize"))
+        
+        ui_instance.capturing_codeforces_var.set(self.get_setting("is_capture_codeforces"))
+        ui_instance.capturing_nowcoder_var.set(self.get_setting("is_capture_nowcoder"))
+        ui_instance.capturing_atcoder_var.set(self.get_setting("is_capture_atcoder"))
+        
         ui_instance.desktop_notify_var.set(self.get_setting("desktop_notify"))
-        
-        ui_instance.capturing_codeforces.set(self.get_setting("is_capture_codeforces"))
-        ui_instance.capturing_nowcoder.set(self.get_setting("is_capture_nowcoder"))
-        ui_instance.capturing_atcoder.set(self.get_setting("is_capture_atcoder"))
-        
+        ui_instance.notify_codeforces_var.set(self.get_setting("is_notify_codeforces"))
+        ui_instance.notify_nowcoder_var.set(self.get_setting("is_notify_nowcoder"))
+        ui_instance.notify_atcoder_var.set(self.get_setting("is_notify_atcoder"))
         
 
     def handle_save(self, ui_instance):
@@ -104,12 +109,15 @@ class SettingsManager:
             "autostart": ui_instance.autostart_var.get(),
             "minimize_to_tray": ui_instance.minimize_to_tray_var.get(),
             "autostart_minimize": ui_instance.autostart_minimize_var.get(),
+            
+            "is_capture_codeforces": ui_instance.capturing_codeforces_var.get(),
+            "is_capture_nowcoder": ui_instance.capturing_nowcoder_var.get(),
+            "is_capture_atcoder": ui_instance.capturing_atcoder_var.get(),
+            
             "desktop_notify": ui_instance.desktop_notify_var.get(),
-            
-            "is_capture_codeforces": ui_instance.capturing_codeforces.get(),
-            "is_capture_nowcoder": ui_instance.capturing_nowcoder.get(),
-            "is_capture_atcoder": ui_instance.capturing_atcoder.get(),
-            
+            "is_notify_codeforces": ui_instance.notify_codeforces_var.get(),
+            "is_notify_nowcoder": ui_instance.notify_nowcoder_var.get(),
+            "is_notify_atcoder": ui_instance.notify_atcoder_var.get(),
         }
         
         self.update_settings(**settings_data)
