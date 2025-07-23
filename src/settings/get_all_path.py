@@ -28,3 +28,9 @@ class GetAllPath:
         else:
             base_path = os.path.abspath(".")
         return os.path.join(base_path, relative_path)
+    
+    def get_contest_data_path(self):
+        config_path = self.base_path / "datas"/ "contest_data.csv"
+        return config_path
+    
+    

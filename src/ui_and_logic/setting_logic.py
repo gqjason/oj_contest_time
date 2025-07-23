@@ -4,9 +4,9 @@ import platform
 import subprocess
 from pathlib import Path
 
-from setting.minimize_to_tray import MinimizeToTray as MTT
-from setting.autostart_manager import AutoStartManager as ASM
-from setting.get_all_path import GetAllPath as GAP
+from settings.minimize_to_tray import MinimizeToTray as MTT
+from settings.autostart_manager import AutoStartManager as ASM
+from settings.get_all_path import GetAllPath as GAP
 from logger import FileLogger
 
 file_name = "setting_logic.py"
@@ -44,11 +44,11 @@ class SettingsManager:
         try:
             if not self.config_file.exists():
                 self.save_settings()  # 保存默认配置
-            if self.config_file.exists():
-                with open(self.config_file, 'r', encoding='utf-8') as f:
-                    loaded_settings = json.load(f)
-                    for key, value in self.DEFAULT_SETTINGS.items():
-                        self.settings[key] = loaded_settings.get(key, value)
+        
+            with open(self.config_file, 'r', encoding='utf-8') as f:
+                loaded_settings = json.load(f)
+                for key, value in self.DEFAULT_SETTINGS.items():
+                    self.settings[key] = loaded_settings.get(key, value)
         except Exception as e:
             self.logger.error(
                 f"[{file_name}][{self.class_name}][load_settings] 加载设置失败: {e}")

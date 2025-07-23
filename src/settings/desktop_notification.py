@@ -39,7 +39,7 @@ class DesktopNotification:
         """
         title = self._sanitize(title)
         message = self._sanitize(message)
-        full_title = f"[{self.hostname}] {title}"
+        full_title = f"{title}"
 
         try:
             notification.notify(

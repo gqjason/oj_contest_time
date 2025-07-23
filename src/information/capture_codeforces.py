@@ -144,7 +144,7 @@ http API返回错误: {data.get('comment', '未知错误')}"
 # 测试代码
 if __name__ == "__main__":
     pass
-    contests = get_codeforces.get_cf()
+    contests = get_codeforces().get_cf()
     # for contest in contests:
     #     print(f"比赛标题: {contest['title']}")
     #     print(f"比赛链接: {contest['link']}")

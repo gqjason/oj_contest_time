@@ -7,7 +7,7 @@ from filelock import FileLock, Timeout
 
 from ui_and_logic.main_logic import AppLogic
 from ui_and_logic.main_ui import AppUI
-from setting.minimize_to_tray import MinimizeToTray
+from settings.minimize_to_tray import MinimizeToTray
 from logger import FileLogger
 from background_worker import AppBackgroundWorker as ABW
 

@@ -4,14 +4,15 @@ from datetime import datetime, timedelta, timezone
 from .capture_nowcoder import get_nowcoder
 from .capture_atcoder import get_atcoder
 from .capture_codeforces import get_codeforces
-from setting.get_all_path import GetAllPath as GAP
+from settings.get_all_path import GetAllPath as GAP
 from logger import FileLogger
 
 file_name = "capture.py"
 class CaptureAllInformation:
     class_name = "CaptureAllInformation"
     
-    def __init__(self):
+    def __init__(self, command = None):
+        self.command = command
         self.config_path = GAP().get_settings_path()
         self.logger = FileLogger(log_level="DEBUG")
         self.setting = self.load_settings()
@@ -31,14 +32,29 @@ class CaptureAllInformation:
         gcf = get_codeforces()
         
         res = []
-        res += gcf.get_cf() if self.is_capture_contest("is_capture_codeforces") else []        
-        res += gnc.get_nc() if self.is_capture_contest("is_capture_nowcoder") else []
-        res += gat.get_ac() if self.is_capture_contest("is_capture_atcoder") else []
         
-        self.logger.debug(f"[{file_name}][{self.class_name}] cf: {self.is_capture_contest("is_capture_codeforces")}")
-        self.logger.debug(f"[{file_name}][{self.class_name}] nk: {self.is_capture_contest("is_capture_nowcoder")}")
-        self.logger.debug(f"[{file_name}][{self.class_name}] at: {self.is_capture_contest("is_capture_atcoder")}")
+        if self.command == "display":
+            res += gcf.get_cf() if self.is_capture_contest("is_capture_codeforces") else []        
+            res += gnc.get_nc() if self.is_capture_contest("is_capture_nowcoder") else []
+            res += gat.get_ac() if self.is_capture_contest("is_capture_atcoder") else []
+            
+            self.logger.debug(f"[{file_name}][{self.class_name}] cf: {self.is_capture_contest("is_capture_codeforces")}")
+            self.logger.debug(f"[{file_name}][{self.class_name}] nk: {self.is_capture_contest("is_capture_nowcoder")}")
+            self.logger.debug(f"[{file_name}][{self.class_name}] at: {self.is_capture_contest("is_capture_atcoder")}")
         
+        elif self.command == "update":
+            res += gcf.get_cf() if self.is_capture_contest("is_notify_codeforces") else []        
+            res += gnc.get_nc() if self.is_capture_contest("is_notify_nowcoder") else []
+            res += gat.get_ac() if self.is_capture_contest("is_notify_atcoder") else []
+            
+            self.logger.debug(f"[{file_name}][{self.class_name}] cf: {self.is_capture_contest("is_notify_codeforces")}")
+            self.logger.debug(f"[{file_name}][{self.class_name}] nk: {self.is_capture_contest("is_notify_nowcoder")}")
+            self.logger.debug(f"[{file_name}][{self.class_name}] at: {self.is_capture_contest("is_notify_atcoder")}")
+       
+        else:
+            res += gcf.get_cf()
+            res += gnc.get_nc()
+            res += gat.get_ac()
         return res
     
     def is_capture_contest(self, key):
@@ -58,7 +74,7 @@ class CaptureAllInformation:
         res.sort(key=lambda x: x['start_time'])
         return res
         
-    def filter_today_competition(self, res):
+    def filter_today_competition(self, result):
         # 获取当前 UTC 时间（时区感知）
         now_utc = datetime.now().astimezone()
     
@@ -68,7 +84,7 @@ class CaptureAllInformation:
         
         # 筛选今天还未开始的比赛
         upcoming_today = []
-        for contest in res:
+        for contest in result:
             # 确保比赛时间是时区感知的
             start_time = contest['start_time']
             #print(start_time, today_start_utc)

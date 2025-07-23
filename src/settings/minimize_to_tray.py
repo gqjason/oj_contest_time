@@ -4,7 +4,7 @@ import threading
 from logger import FileLogger
 import tkinter as tk
 
-from setting.get_all_path import GetAllPath as GAP
+from settings.get_all_path import GetAllPath as GAP
 
 file_name = "minimize_to_tray.py"
 class MinimizeToTray:
