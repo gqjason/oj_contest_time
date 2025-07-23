@@ -4,7 +4,7 @@ import socket
 from plyer import notification
 from dotenv import load_dotenv
 
-from logger_test import FileLogger
+from logger import FileLogger
 from get_all_path import GetAllPath as GAP
 
 file_name = "desktop_notification.py"
