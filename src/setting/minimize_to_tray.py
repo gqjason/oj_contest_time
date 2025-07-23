@@ -1,20 +1,12 @@
 import pystray
 from PIL import Image
 import threading
-import os
-import sys
 from logger import FileLogger
 import tkinter as tk
 
+from setting.get_all_path import GetAllPath as GAP
+
 file_name = "minimize_to_tray.py"
-
-def get_resource_path(relative_path):
-    if getattr(sys, 'frozen', False):
-        base_path = sys._MEIPASS
-    else:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-
 class MinimizeToTray:
     class_name = "MinimizeToTray"
 
@@ -38,7 +30,7 @@ class MinimizeToTray:
             self.create_tray_icon()
 
     def create_tray_icon(self):
-        icon_path = get_resource_path("resources/icons/app.ico")
+        icon_path = GAP().get_resource_path("resources/icons/app.ico")
         image = Image.open(icon_path)
         menu = pystray.Menu(
             pystray.MenuItem("显示", self.on_show),

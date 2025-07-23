@@ -9,6 +9,7 @@ from ui_and_logic.main_logic import AppLogic
 from ui_and_logic.main_ui import AppUI
 from setting.minimize_to_tray import MinimizeToTray
 from logger import FileLogger
+from background_worker import AppBackgroundWorker as ABW
 
 file_name = "app_window_manager.py"
 class AppWindowManager:
@@ -24,6 +25,7 @@ class AppWindowManager:
         
         self.app_logic = AppLogic()
         self.app_ui = AppUI(self.root, self.app_logic)
+        self.background_worker = ABW()
         self.tray_manager = MinimizeToTray(self.root)
         self.settings = self.load_settings()
 
@@ -46,6 +48,7 @@ class AppWindowManager:
         self.tray_manager.enable_running()
 
     def run(self):
+        self.background_worker.start()
         should_hide = "--hidden" in sys.argv or self.settings.get("autostart_minimize", False)
 
         # 防止多开
@@ -66,3 +69,5 @@ class AppWindowManager:
             self.root.deiconify()
 
         self.root.mainloop()
+        
+        self.background_worker.stop()

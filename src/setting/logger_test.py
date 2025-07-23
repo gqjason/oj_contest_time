@@ -4,7 +4,7 @@ from datetime import datetime
 from tkinter import ttk, messagebox
 from pathlib import Path
 
-from setting.get_all_path import GetAllPath as GAP
+from get_all_path import GetAllPath as GAP
 
 class FileLogger:
     """

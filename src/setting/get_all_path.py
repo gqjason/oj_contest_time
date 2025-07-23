@@ -21,3 +21,10 @@ class GetAllPath:
     def get_logs_path(self):
         logs_path = self.base_path / "logs"
         return logs_path
+    
+    def get_resource_path(self, relative_path):
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS # type: ignore
+        else:
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)

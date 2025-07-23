@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from .capture_nowcoder import get_nowcoder
 from .capture_atcoder import get_atcoder
 from .capture_codeforces import get_codeforces
-from setting.get_configs_and_logs_path import GetAllPath as GAP
+from setting.get_all_path import GetAllPath as GAP
 from logger import FileLogger
 
 file_name = "capture.py"

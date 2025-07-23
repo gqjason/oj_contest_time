@@ -6,7 +6,7 @@ from pathlib import Path
 
 from setting.minimize_to_tray import MinimizeToTray as MTT
 from setting.autostart_manager import AutoStartManager as ASM
-from setting.get_configs_and_logs_path import GetAllPath as GAP
+from setting.get_all_path import GetAllPath as GAP
 from logger import FileLogger
 
 file_name = "setting_logic.py"
