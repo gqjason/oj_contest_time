@@ -4,15 +4,10 @@ from datetime import datetime, timedelta, timezone
 
 from logger import FileLogger
 from settings.get_all_path import GetAllPath as GAP
-<<<<<<< HEAD
 from information.gather_total_contest_data import CaptureAllInformation as CAI
-=======
-from .capture import CaptureAllInformation as CAI
->>>>>>> 6851b480b0984cc9a83ffaa74cb9ce5305e1fdc7
 from settings.desktop_notification import DesktopNotification as DN
 
 file_name = "update_contest_data.py"
-
 class UpdateContestData:
     class_name = "UpdateContestData"
     
