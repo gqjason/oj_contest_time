@@ -1,7 +1,7 @@
 import threading
 import time
 
-from information.capture import CaptureAllInformation as CAI
+from information.gather_total_contest_data import CaptureAllInformation as CAI
 from .setting_logic import SettingsManager
 
 class AppLogic:
