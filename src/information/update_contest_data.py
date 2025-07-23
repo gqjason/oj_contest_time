@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 from logger import FileLogger
 from settings.get_all_path import GetAllPath as GAP
-from capture import CaptureAllInformation as CAI
+from .capture import CaptureAllInformation as CAI
 from settings.desktop_notification import DesktopNotification as DN
 
 file_name = "update_contest_data.py"
