@@ -2,10 +2,9 @@ import os
 import re
 import socket
 from plyer import notification
-from dotenv import load_dotenv
 
 from logger import FileLogger
-from get_all_path import GetAllPath as GAP
+from .get_all_path import GetAllPath as GAP
 
 file_name = "desktop_notification.py"
 class DesktopNotification:
