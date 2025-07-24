@@ -78,7 +78,7 @@ class AppWindowManager:
         window_title = self.root.title()  # 获取标题字符串
         current_process_name = self.get_current_exe_name()
         count_process_name = self.is_tray_icon_running(process_name=current_process_name)
-        if count_process_name > 2:
+        if count_process_name > 3:
             self.logger.warning(f"[{file_name}][{self.class_name}] 托盘图标已在运行，无法启动新实例。")
             self.kill_tray_icon_process(count_process_name,process_name=current_process_name)
         

@@ -25,11 +25,6 @@ class AppBackgroundWorker:
             self.logger.debug(f"[{file_name}][{self.class_name}][background_run] 初始化时更新数据")
             ucd.updating_data() # 初始化
             
-        def is_on_the_hour_utc():
-            """检查UTC时间是否为整点"""
-            now = datetime.now(timezone.utc)
-            return now.minute == 0 and now.second < 2
-        
         self.logger.info(f"[{file_name}][{self.class_name}] 后台任务启动")
         time_point_front, time_point_back = time.time(),time.time()
         while self._running:
@@ -47,7 +42,7 @@ class AppBackgroundWorker:
                 if current_settings["desktop_notify"]:
                     ucd.prepare_contest_notify()
             except Exception as e:
-                self.logger.error(f"[{file_name}][{self.class_name}][_run] 运行时异常: {e}")
+                self.logger.error(f"[{file_name}][{self.class_name}][background_run] 运行时异常: {e}")
 
         self.logger.info(f"[{file_name}][{self.class_name}] 后台任务已停止")
 
