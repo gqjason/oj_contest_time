@@ -17,12 +17,10 @@ class AppWindowManager:
     class_name = "AppWindowManager"
     
     def __init__(self):
-        self.logger = FileLogger()
+        self.logger = FileLogger(log_level="DEBUG")
         self.root = tk.Tk()
         
-        base_path = GAP().get_base_path()
-        config_dir = base_path / "configs"
-        self.config_path =  config_dir / "settings.json"
+        self.config_path =  GAP().get_settings_path()
         
         self.app_logic = AppLogic()
         self.app_ui = AppUI(self.root, self.app_logic)
@@ -37,8 +35,12 @@ class AppWindowManager:
     def run(self):
         self.background_worker.start()
         self.settings = GAP().load_settings()
+        
         should_hide = "--hidden" in sys.argv or self.settings.get("autostart_minimize", False)
-
+        self.logger.debug(f"[{file_name}][{self.class_name}] 应用程序启动，隐藏状态: {should_hide}, 设置自启动最小化: {self.settings.get("autostart_minimize")}, 运行托盘: {self.settings.get("minimize_to_tray")}, should_hide: {should_hide}")
+        
+        self.tray_manager.create_tray_icon()  # 初始化托盘
+        
         # 防止多开
         lock_file = os.path.join(os.path.expanduser("~"), ".your_app.lock")
         self.lock = FileLock(lock_file)

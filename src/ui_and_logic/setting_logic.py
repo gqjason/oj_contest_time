@@ -65,7 +65,6 @@ class SettingsManager:
                 json.dump(self.settings, f, indent=4, ensure_ascii=False)
 
             self.logger.info(f"[{file_name}][{self.class_name}] 正在保存设置")
-            UCD().updating_data()
             return True
         except Exception as e:
             self.logger.error(

@@ -15,10 +15,10 @@ class MinimizeToTray:
         self.tray_icon = None
         self.logger = FileLogger()
 
-    def on_show(self, icon, item):
+    def on_show(self):
         self.window.after(0, self.window.deiconify)
 
-    def on_quit(self, icon, item):
+    def on_quit(self, icon):
         self.logger.info(f"[{file_name}][{self.class_name}] 退出程序")
         icon.stop()
         self.window.after(0, self.window.destroy)
@@ -40,7 +40,9 @@ class MinimizeToTray:
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
 
     def enable_running(self):
+        self.logger.info(f"[{file_name}][{self.class_name}][enable_running] 启用最小化托盘")
         self.window.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def disable_running(self):
+        self.logger.info(f"[{file_name}][{self.class_name}][disable_running] 禁用最小化托盘")
         self.window.protocol("WM_DELETE_WINDOW", self.window.destroy)

@@ -21,7 +21,10 @@ class AppBackgroundWorker:
     def background_run(self):
         
         ucd = UCD()
-        ucd.updating_data() # 初始化
+        if not GAP().get_contest_data_path().exists():
+            self.logger.debug(f"[{file_name}][{self.class_name}][background_run] 初始化时更新数据")
+            ucd.updating_data() # 初始化
+            
         def is_on_the_hour_utc():
             """检查UTC时间是否为整点"""
             now = datetime.now(timezone.utc)

@@ -17,7 +17,7 @@ class UpdateContestData:
         
         if not self.contest_path.exists():
             self.logger.warning(f"[{file_name}][{self.class_name}][__init__] 文件不存在，正在创建空文件")
-            self.save_contest_data([], encoding='utf-8')
+            self.updating_data()  # 初始化时更新数据
 
     
     def updating_data(self):
