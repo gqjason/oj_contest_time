@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from logger import FileLogger
-
+from settings.get_all_path import GetAllPath as GAP
+from information.update_contest_data import UpdateContestData as UCD
 def temp():pass
 
 file_name = "setting_ui.py"
@@ -100,6 +101,7 @@ class SettingsDialog:
                 f"[{file_name}][{self.class_name}] 设置已保存并应用"
                 )
             self.dialog.destroy()
+            UCD().update_contest_data()  # 更新要通知的比赛数据
         else:
             messagebox.showerror("错误", "保存设置失败")
             self.logger.error(
@@ -287,7 +289,7 @@ class SettingsDialog:
         )
         self.open_logs_directory_button.place(x=5, y=35)  # y坐标向下偏移，按钮之间大概40像素
     def open_config_file(self):
-        target_config_path = self.settings_manager.config_path
+        target_config_path = GAP().get_settings_path().parent
         self.settings_manager.open_folder_in_explorer(target_config_path)
     def open_logs_file(self):
         target_logs_path = self.logger.log_dir

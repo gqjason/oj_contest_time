@@ -49,7 +49,9 @@ class AppWindowManager:
     def is_tray_icon_running(self, process_name="main.exe"):
         for proc in psutil.process_iter(['name']):
             if proc.info['name'] == process_name:
+                self.logger.info(f"[{file_name}][{self.class_name}] 托盘图标进程已在运行：{process_name}")
                 return True
+        self.logger.info(f"[{file_name}][{self.class_name}] 托盘图标进程未运行：{process_name}")
         return False
 
     # 如果发现已有托盘进程，则强制结束
