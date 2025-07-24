@@ -30,6 +30,7 @@ class MinimizeToTray:
             self.create_tray_icon()
 
     def create_tray_icon(self):
+        self.logger.info(f"[{file_name}][{self.class_name}][create_tray_icon] self.tray_icon: {str(self.tray_icon)}")
         if not self.tray_icon:
             icon_path = GAP().get_resource_path("resources/icons/app.ico")
             image = Image.open(icon_path)

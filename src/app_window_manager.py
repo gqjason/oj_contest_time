@@ -42,31 +42,33 @@ class AppWindowManager:
 
         windows = []
         win32gui.EnumWindows(enum_handler, windows)
+        self.logger.info(f"[{file_name}][{self.class_name}] 有{len(windows)}个程序窗口正在运行")
         return len(windows) > 0
 
 
 
     def is_tray_icon_running(self, process_name="main.exe"):
+        count_process_name = 0
         for proc in psutil.process_iter(['name']):
             if proc.info['name'] == process_name:
-                self.logger.info(f"[{file_name}][{self.class_name}] 托盘图标进程已在运行：{process_name}")
-                return True
-        self.logger.info(f"[{file_name}][{self.class_name}] 托盘图标进程未运行：{process_name}")
-        return False
+                count_process_name += 1
+
+        self.logger.info(f"[{file_name}][{self.class_name}] 共有 {count_process_name}个进程在后台运行")
+        return count_process_name
 
     # 如果发现已有托盘进程，则强制结束
-    def kill_tray_icon_process(self, process_name="main.exe"):
+    def kill_tray_icon_process(self, count_process_name, process_name="main.exe"):
         for proc in psutil.process_iter(['pid', 'name']):
-            if proc.info['name'] == process_name:
+            if proc.info['name'] == process_name and count_process_name > 2:
                 try:
                     proc.terminate()  # 或 proc.kill()
-                    proc.wait(timeout=2)  # 等待结束
+                    proc.wait(timeout=1)  # 等待结束
                     self.logger.info(f"[{file_name}][{self.class_name}] 已结束进程：{process_name} (PID={proc.pid})")
-                    return True
+                    
                 except Exception as e:
                     self.logger.error(f"[{file_name}][{self.class_name}] 无法结束进程 {proc.info['name']}：{e}")
-                    return False
-        return False
+                    
+        
 
     def get_current_exe_name(self):
         return os.path.basename(sys.executable)
@@ -78,10 +80,11 @@ class AppWindowManager:
         if self.is_window_running(window_title):
             self.logger.warning(f"[{file_name}][{self.class_name}] 应用程序已在运行，无法启动新实例。")
             sys.exit(0)
-            
-        if self.is_tray_icon_running(process_name=current_process_name):
+        
+        count_process_name = self.is_tray_icon_running(process_name=current_process_name)
+        if count_process_name > 2:
             self.logger.warning(f"[{file_name}][{self.class_name}] 托盘图标已在运行，无法启动新实例。")
-            self.kill_tray_icon_process(process_name=current_process_name)
+            self.kill_tray_icon_process(count_process_name,process_name=current_process_name)
         
         self.background_worker.start()
         self.settings = GAP().load_settings()
