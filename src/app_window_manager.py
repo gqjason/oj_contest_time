@@ -52,11 +52,10 @@ class AppWindowManager:
 
         self.apply_tray_behavior()
 
-        if should_hide and self.settings.get("minimize_to_tray", False):
-            self.root.withdraw()
-            self.tray_manager.on_close()  # 初始化托盘
+        if self.settings.get("minimize_to_tray", False):
+            self.tray_manager.enable_running()  # 替换原 apply_tray_behavior
         else:
-            self.root.deiconify()
+            self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)
 
         self.root.mainloop()
         
