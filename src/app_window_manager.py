@@ -36,6 +36,7 @@ class AppWindowManager:
 
     def run(self):
         self.background_worker.start()
+        self.settings = GAP().load_settings()
         should_hide = "--hidden" in sys.argv or self.settings.get("autostart_minimize", False)
 
         # 防止多开

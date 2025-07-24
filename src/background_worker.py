@@ -19,12 +19,14 @@ class AppBackgroundWorker:
         self.logger = FileLogger(log_level="DEBUG")
 
     def background_run(self):
+        
         ucd = UCD()
         ucd.updating_data() # 初始化
         def is_on_the_hour_utc():
             """检查UTC时间是否为整点"""
             now = datetime.now(timezone.utc)
-            return now.minute == 0 and now.second == 0
+            return now.minute == 0 and now.second < 2
+        
         self.logger.info(f"[{file_name}][{self.class_name}] 后台任务启动")
         while self._running:
             try:
