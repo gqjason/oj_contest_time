@@ -31,11 +31,16 @@ class UpdateContestData:
             self.logger.info(f"[{file_name}][{self.class_name}][prepare_contest_notify] 读取成功，共 {len(contest_data)} 条记录")
             
             for contest in contest_data:
-                start_time = contest['start_time']
+                # 获取时间
+                start_time_str = contest['start_time']
+                start_time = datetime.fromisoformat(start_time_str)
                 current_time = datetime.now().astimezone()
-                
-                start_time_seconds = start_time.timestamp()
-                current_time_seconds = current_time.timestamp()
+                # 3. 统一为 UTC 时间格式
+                start_time_utc = start_time.astimezone(timezone.utc)
+                current_time_utc = current_time.astimezone(timezone.utc)
+                                
+                start_time_seconds = start_time_utc.timestamp()
+                current_time_seconds = current_time_utc.timestamp()
                 time_gap = abs(abs(current_time_seconds-start_time_seconds) - 3600)
                 
                 if time_gap <= 10.0:

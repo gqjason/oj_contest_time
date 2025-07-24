@@ -20,6 +20,7 @@ class AppBackgroundWorker:
 
     def background_run(self):
         ucd = UCD()
+        ucd.updating_data() # 初始化
         def is_on_the_hour_utc():
             """检查UTC时间是否为整点"""
             now = datetime.now(timezone.utc)
