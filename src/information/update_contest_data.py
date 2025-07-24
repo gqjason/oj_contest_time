@@ -14,7 +14,11 @@ class UpdateContestData:
     def __init__(self):
         self.logger = FileLogger()
         self.contest_path = GAP().get_contest_data_path()
-        self.save_contest_data([])
+        
+        if not self.contest_path.exists():
+            self.logger.warning(f"[{file_name}][{self.class_name}][__init__] 文件不存在，正在创建空文件")
+            self.save_contest_data([], encoding='utf-8')
+
     
     def updating_data(self):
         cai = CAI(command="update")
@@ -24,7 +28,7 @@ class UpdateContestData:
     def prepare_contest_notify(self):
         contest_data = self.read_contest_data()
         if contest_data and isinstance(contest_data, list):
-            self.logger.info(f"[{file_name}][{self.class_name}][f1] 读取成功，共 {len(contest_data)} 条记录")
+            self.logger.info(f"[{file_name}][{self.class_name}][prepare_contest_notify] 读取成功，共 {len(contest_data)} 条记录")
             
             for contest in contest_data:
                 start_time = contest['start_time']
@@ -64,10 +68,10 @@ class UpdateContestData:
 
     def read_contest_data(self, encoding='utf-8') -> list[dict]:
         try:
-            if not self.contest_path.exists():
-                self.logger.warning(f"[{file_name}][{self.class_name}][read_contest_data] 文件不存在，正在创建空文件")
-                self.save_contest_data([], encoding=encoding)
-                return []
+            # if not self.contest_path.exists():
+            #     self.logger.warning(f"[{file_name}][{self.class_name}][read_contest_data] 文件不存在，正在创建空文件")
+            #     self.save_contest_data([], encoding=encoding)
+            #     return []
             df = pd.read_csv(self.contest_path, encoding=encoding)
             return df.to_dict(orient="records")
         except Exception as e:

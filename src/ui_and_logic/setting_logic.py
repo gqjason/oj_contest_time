@@ -7,6 +7,7 @@ from pathlib import Path
 from settings.minimize_to_tray import MinimizeToTray as MTT
 from settings.autostart_manager import AutoStartManager as ASM
 from settings.get_all_path import GetAllPath as GAP
+from information.update_contest_data import UpdateContestData as UCD
 from logger import FileLogger
 
 file_name = "setting_logic.py"
@@ -64,6 +65,7 @@ class SettingsManager:
                 json.dump(self.settings, f, indent=4, ensure_ascii=False)
 
             self.logger.info(f"[{file_name}][{self.class_name}] 正在保存设置")
+            UCD().updating_data()
             return True
         except Exception as e:
             self.logger.error(

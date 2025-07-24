@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 
 from logger import FileLogger
 from information.update_contest_data import UpdateContestData as UCD
-
+from ui_and_logic.setting_logic import SettingsManager as SM
 file_name = "background_worker.py"
 class AppBackgroundWorker:
     class_name = "AppBackgroundWorker"
@@ -17,7 +17,7 @@ class AppBackgroundWorker:
         self._thread = None
         self.logger = FileLogger()
 
-    def _run(self):
+    def run(self):
         ucd = UCD()
         def is_on_the_hour_utc():
             """检查UTC时间是否为整点"""
@@ -33,7 +33,9 @@ class AppBackgroundWorker:
                     ucd.updating_data()
 
                 time.sleep(random.uniform(5,6))
-                ucd.prepare_contest_notify()
+                sm = SM()
+                if sm.DEFAULT_SETTINGS["desktop_notify"]:
+                    ucd.prepare_contest_notify()
             except Exception as e:
                 self.logger.error(f"[{file_name}][{self.class_name}][_run] 运行时异常: {e}")
 
@@ -42,7 +44,7 @@ class AppBackgroundWorker:
     def start(self):
         if not self._running:
             self._running = True
-            self._thread = threading.Thread(target=self._run, daemon=True)
+            self._thread = threading.Thread(target=self.run, daemon=True)
             self._thread.start()
             self.logger.info(f"[{file_name}][{self.class_name}] 后台线程已启动")
 
