@@ -74,7 +74,7 @@ class AppWindowManager:
     def run(self):
         # 防止多开
         window_title = self.root.title()  # 获取标题字符串
-        current_process_name = self.get_current_exe_name
+        current_process_name = self.get_current_exe_name()
         if self.is_window_running(window_title):
             self.logger.warning(f"[{file_name}][{self.class_name}] 应用程序已在运行，无法启动新实例。")
             sys.exit(0)

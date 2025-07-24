@@ -30,7 +30,7 @@ class MinimizeToTray:
             self.create_tray_icon()
 
     def create_tray_icon(self):
-        if self.tray_icon is None:
+        if not self.tray_icon:
             icon_path = GAP().get_resource_path("resources/icons/app.ico")
             image = Image.open(icon_path)
             menu = pystray.Menu(
