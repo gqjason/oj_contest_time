@@ -77,14 +77,15 @@ class AppWindowManager:
         # 防止多开
         window_title = self.root.title()  # 获取标题字符串
         current_process_name = self.get_current_exe_name()
-        if self.is_window_running(window_title):
-            self.logger.warning(f"[{file_name}][{self.class_name}] 应用程序已在运行，无法启动新实例。")
-            sys.exit(0)
-        
         count_process_name = self.is_tray_icon_running(process_name=current_process_name)
         if count_process_name > 2:
             self.logger.warning(f"[{file_name}][{self.class_name}] 托盘图标已在运行，无法启动新实例。")
             self.kill_tray_icon_process(count_process_name,process_name=current_process_name)
+        
+        if self.is_window_running(window_title):
+            self.logger.warning(f"[{file_name}][{self.class_name}] 应用程序已在运行，无法启动新实例。")
+            sys.exit(0)
+        
         
         self.background_worker.start()
         self.settings = GAP().load_settings()
