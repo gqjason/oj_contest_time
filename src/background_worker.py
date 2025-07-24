@@ -35,7 +35,7 @@ class AppBackgroundWorker:
         while self._running:
             try:
                 # 在这里放置你的后台逻辑
-                self.logger.debug(f"[{file_name}][{self.class_name}] 正在运行后台任务...")
+                #self.logger.debug(f"[{file_name}][{self.class_name}] 正在运行后台任务...")
                 
                 time_point_back =time.time()
                 if time_point_back - time_point_front >= 600:
@@ -43,7 +43,7 @@ class AppBackgroundWorker:
                     ucd.updating_data()
 
                 current_settings = GAP().load_settings()
-                self.logger.debug(f"[{file_name}][{self.class_name}][run] \"desktop_notify\" is {current_settings["desktop_notify"]}")
+                #self.logger.debug(f"[{file_name}][{self.class_name}][run] \"desktop_notify\" is {current_settings["desktop_notify"]}")
                 if current_settings["desktop_notify"]:
                     ucd.prepare_contest_notify()
             except Exception as e:
