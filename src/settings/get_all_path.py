@@ -1,15 +1,15 @@
 import os
 import sys
 import json
+from tkinter import ttk, messagebox
 from pathlib import Path
 
-
+file_name = "get_all_path.py"
 class GetAllPath:
+    class_name = "GetAllPath"
     
     def __init__(self) -> None:
         self.base_path = self.get_base_path()
-        pass
-    
     
     def get_base_path(self):
         return Path.home() / "oj_contest_time"
@@ -33,4 +33,10 @@ class GetAllPath:
         config_path = self.base_path / "datas"/ "contest_data.csv"
         return config_path
     
-    
+    def load_settings(self):
+        try:
+            with open(self.get_settings_path(), "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            messagebox.showinfo(f"[{file_name}][{self.class_name}]", f"[load_settings] 无法加载设置: {e}")
+            return {}

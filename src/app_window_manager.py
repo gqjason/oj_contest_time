@@ -8,6 +8,7 @@ from filelock import FileLock, Timeout
 from ui_and_logic.main_logic import AppLogic
 from ui_and_logic.main_ui import AppUI
 from settings.minimize_to_tray import MinimizeToTray
+from settings.get_all_path import GetAllPath as GAP
 from logger import FileLogger
 from background_worker import AppBackgroundWorker as ABW
 
@@ -19,7 +20,7 @@ class AppWindowManager:
         self.logger = FileLogger()
         self.root = tk.Tk()
         
-        base_path = self.get_base_path()
+        base_path = GAP().get_base_path()
         config_dir = base_path / "configs"
         self.config_path =  config_dir / "settings.json"
         
@@ -27,21 +28,7 @@ class AppWindowManager:
         self.app_ui = AppUI(self.root, self.app_logic)
         self.background_worker = ABW()
         self.tray_manager = MinimizeToTray(self.root)
-        self.settings = self.load_settings()
-
-    @staticmethod
-    def get_base_path():
-        return Path.home() / "oj_contest_time"
-    
-    def load_settings(self):
-        
-        try:
-            with open(self.config_path, "r", encoding="utf-8") as f:
-                self.logger.info(f"[{file_name}][{self.class_name}] 文件路径: {self.config_path}")
-                return json.load(f)
-        except Exception as e:
-            self.logger.error(f"[AppWindowManager] 无法加载设置: {e}")
-            return {}
+        self.settings = GAP().load_settings()
 
     def apply_tray_behavior(self):
         """托盘逻辑统一放在 run 中处理"""
