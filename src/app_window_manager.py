@@ -51,6 +51,7 @@ class AppWindowManager:
         count_process_name = 0
         for proc in psutil.process_iter(['name']):
             if proc.info['name'] == process_name:
+                self.logger.info(f"[{file_name}][{self.class_name}] 进程名：{process_name} (PID={proc.pid})")
                 count_process_name += 1
 
         self.logger.info(f"[{file_name}][{self.class_name}] 共有 {count_process_name}个进程在后台运行")
@@ -59,10 +60,10 @@ class AppWindowManager:
     # 如果发现已有托盘进程，则强制结束
     def kill_tray_icon_process(self, count_process_name, process_name="main.exe"):
         for proc in psutil.process_iter(['pid', 'name']):
-            if proc.info['name'] == process_name and count_process_name > 2:
+            if proc.info['name'] == process_name and count_process_name > 3:
                 try:
-                    proc.terminate()  # 或 proc.kill()
-                    proc.wait(timeout=1)  # 等待结束
+                    proc.kill()
+                    proc.wait(timeout=0.5)  # 等待结束
                     self.logger.info(f"[{file_name}][{self.class_name}] 已结束进程：{process_name} (PID={proc.pid})")
                     
                 except Exception as e:
