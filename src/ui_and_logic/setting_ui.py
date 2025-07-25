@@ -9,8 +9,8 @@ def temp():pass
 
 file_name = "setting_ui.py"
 class SettingsDialog:
-    
     class_name = "SettingsDialog"
+    
     """设置对话框类"""
     def __init__(self, parent, settings_manager):
         """
@@ -24,21 +24,25 @@ class SettingsDialog:
         self.settings_manager = settings_manager
         self.logger = FileLogger()
         
-        # 创建对话框
-        self.dialog = tk.Toplevel(parent)
-        self.dialog.title("设置")
-        self.dialog.geometry("500x450")
-        self.dialog.transient(parent)
-        self.dialog.grab_set()
-        self.dialog.resizable(True, True)
+        try:
+            # 创建对话框
+            self.dialog = tk.Toplevel(parent)
+            self.dialog.title("设置")
+            self.dialog.geometry("500x450")
+            self.dialog.transient(parent)
+            self.dialog.grab_set()
+            self.dialog.resizable(True, True)
+            
+            self.create_setting_widgets()
+            self.center_window(self.dialog, parent)
+            
+            # 应用当前设置到UI
+            self.settings_manager.apply_settings(self)
+            self.logger.info(f"[{file_name}][{self.class_name}] 创建设置窗口成功")
         
-        self.create_setting_widgets()
-        self.center_window(self.dialog, parent)
-        
-        # 应用当前设置到UI
-        self.settings_manager.apply_settings(self)
-        
-        
+        except Exception as e:
+            self.logger.error(f"[{file_name}][{self.class_name}][__init__] 创建设置窗口失败, 原因: {e}")
+
     def create_setting_widgets(self):
         setting_frame = ttk.Frame(self.dialog)
         setting_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)

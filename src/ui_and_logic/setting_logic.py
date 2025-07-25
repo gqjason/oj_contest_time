@@ -16,8 +16,8 @@ class SettingsManager:
     """管理应用程序设置的类"""
     DEFAULT_SETTINGS = {
         "autostart": False,
-        "minimize_to_tray": False,
-        # "autostart_minimize": False,
+        # "minimize_to_tray": False,
+        "autostart_minimize": False,
         
         "is_capture_codeforces": False,
         "is_capture_nowcoder": False,
@@ -30,7 +30,7 @@ class SettingsManager:
         
     }
 
-    def __init__(self, main_window=None, config_file=None):
+    def __init__(self, main_window=None):
         self.main_window = main_window
         self.logger = FileLogger()
 
