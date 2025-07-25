@@ -54,14 +54,15 @@ class AutoStartManager:
 
         os.makedirs(self.vbs_path, exist_ok=True) # 确保目录存在
         # 最终传递给WshShell.Run的字符串
-        run_command = f'"{self.exe_path}"'+" --silent"
+        run_command = f'{self.exe_path} --silent'
         vbs_content = f"""
-                    Set WshShell = WScript.CreateObject("WScript.Shell")
-                    WshShell.Run "{run_command}", 0, False
+Set WshShell = WScript.CreateObject("WScript.Shell")
+WshShell.Run "\"{run_command}\"", 0, False
                     """
         # 移除VBS内容中的空行和多余空格，使其更紧凑
-        vbs_content = "\n".join([line.strip() for line in vbs_content.splitlines() if line.strip()])
-
+        vbs_content = "\n".join(
+            [line.strip() for line in vbs_content.splitlines() if line.strip()]
+        )
         try:
             # 写入 VBScript 文件
             with open(self.vbs_file_path, "w") as f:
