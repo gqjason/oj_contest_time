@@ -52,27 +52,13 @@ class AutoStartManager:
     
     def create_vbs_regedit_script(self):
 
-        # 构造VBScript文件的路径
-        # 将VBS脚本放在一个不容易被用户误删的地方，例如应用数据目录
-        # 如果你的exe也在同一目录，可以考虑将VBS放在exe同目录下
         os.makedirs(self.vbs_path, exist_ok=True) # 确保目录存在
-        
-        # 构造 VBScript 内容
-        # 注意：在VBScript中，路径中的反斜杠需要转义，且整个路径字符串需要用双引号包裹
-        # 如果exe_path本身包含空格，那么在VBScript的Run命令中需要用额外的双引号包裹
-        # 例如："""C:\Program Files\My App\app.exe"""
-        exe_path_escaped_for_vbs = self.exe_path.replace("\\", "\\\\") # 在VBS中反斜杠不需要额外转义，但为了安全考虑，如果将来有特殊字符，这样处理更通用
-        
         # 最终传递给WshShell.Run的字符串
-        # 假设exe_path可能包含空格，所以用额外的双引号包裹
-        run_command = f'"{self.exe_path}"'
-        
-        run_command += " --silent"
-
+        run_command = f'"{self.exe_path}"'+" --silent"
         vbs_content = f"""
-    Set WshShell = WScript.CreateObject("WScript.Shell")
-    WshShell.Run "{run_command}", 0, False
-    """
+                    Set WshShell = WScript.CreateObject("WScript.Shell")
+                    WshShell.Run "{run_command}", 0, False
+                    """
         # 移除VBS内容中的空行和多余空格，使其更紧凑
         vbs_content = "\n".join([line.strip() for line in vbs_content.splitlines() if line.strip()])
 
@@ -84,13 +70,8 @@ class AutoStartManager:
 
             # 写入注册表
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-
             key_root = winreg.HKEY_CURRENT_USER
-
-            # 打开或创建注册表键
             key = winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE)
-            # 设置注册表值，值为VBScript的启动命令
-            # 注册表项的值直接是VBScript文件的完整路径
             winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, f'wscript.exe "{self.vbs_file_path}"')
             winreg.CloseKey(key)
 
@@ -106,18 +87,6 @@ class AutoStartManager:
             return False
 
     def remove_vbs_regedit_script(self):
-        """
-        从注册表中移除程序的静默自动启动设置，并删除生成的VBS脚本。
-
-        Args:
-            app_name (str): 你的应用程序的名称，用于查找注册表项和VBS文件。
-            use_hklm (bool, optional): 如果为 True，则从 HKEY_LOCAL_MACHINE (所有用户)
-                                    注册表键中删除。
-                                    如果为 False，则从 HKEY_CURRENT_USER (当前用户) 中删除。
-                                    默认为 False。
-        Returns:
-            bool: 如果移除成功则返回 True，否则返回 False。
-        """
         try:
             # 尝试删除 VBScript 文件
             if os.path.exists(self.vbs_file_path):
@@ -128,7 +97,6 @@ class AutoStartManager:
 
             # 尝试从注册表删除
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-
             key_root = winreg.HKEY_CURRENT_USER
 
             try:
@@ -137,6 +105,7 @@ class AutoStartManager:
                 winreg.CloseKey(key)
                 self.logger.info(f"Successfully removed '{self.app_name}' from autostart.")
                 return True
+            
             except FileNotFoundError: # 如果注册表键不存在
                 self.logger.warning(f"Registry entry for '{self.app_name}' not found.")
                 return True # 视为成功，因为它已经不在了
@@ -153,7 +122,8 @@ class AutoStartManager:
             "schtasks",
             "/Create",
             "/SC", "ONSTART",
-            "/DELAY", "0000:00:15",
+            "/DELAY", "PT5S",  # 延迟5秒启动
+            "/Z",                # 任务在系统启动时运行
             "/TN", self.task_name,
             "/TR", self.task_path,
             "/RL", "HIGHEST",           # 最高权限运行
