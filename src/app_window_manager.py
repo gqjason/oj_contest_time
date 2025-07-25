@@ -93,20 +93,17 @@ class AppWindowManager:
         self.logger.debug(f"[{file_name}][{self.class_name}] 应用程序启动，隐藏状态: {should_hide}, 设置自启动最小化: {self.settings.get("autostart_minimize")}, 运行托盘: {self.settings.get("minimize_to_tray")}, should_hide: {should_hide}")
         
         self.tray_manager.create_tray_icon()  # 初始化托盘
-        
-        
-        # lock_file = os.path.join(os.path.expanduser("~"), ".your_app.lock")
-        # self.lock = FileLock(lock_file)
-        # try:
-        #     self.lock.acquire(timeout=0.1)
-        # except Timeout:
-        #     print("程序已在运行。")
-        #     sys.exit(0)
+        self.logger.info(f"[{file_name}][{self.class_name}] 已创建托盘图标")
 
-        self.apply_tray_behavior()
+        self.apply_tray_behavior
+        self.logger.info(f"[{file_name}][{self.class_name}] 已运行self.apply_tray_behavior()")
+
 
         if self.settings.get("minimize_to_tray", False):
+            self.logger.info(f"[{file_name}][{self.class_name}] minimize_to_tray: {self.settings.get("minimize_to_tray", False)}")
             self.tray_manager.enable_running()  # 替换原 apply_tray_behavior
+            self.logger.info(f"[{file_name}][{self.class_name}] 已运行self.tray_manager.enable_running() ")
+
 
         else:
             self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)
