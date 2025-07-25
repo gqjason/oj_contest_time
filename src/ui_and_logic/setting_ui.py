@@ -111,9 +111,8 @@ class SettingsDialog:
         """处理保存按钮点击事件"""
         if self.settings_manager.handle_save(self):
             messagebox.showinfo("成功", "设置已保存并应用")
-            self.logger.info(
-                f"[{file_name}][{self.class_name}] 设置已保存并应用"
-                )
+            self.logger.info(f"[{file_name}][{self.class_name}] 设置已保存并应用")
+            
             self.dialog.destroy()
             UCD().updating_data()  # 更新要通知的比赛数据
         else:

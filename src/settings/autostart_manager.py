@@ -20,7 +20,8 @@ class AutoStartManager:
                 self.logger.info("[AutoStartManager] 已禁用开机启动")
                 return
 
-            exe_path = f'"{sys.executable}" {"--hidden" if minimized else ""}'.strip()
+            exe_path = f'"{sys.executable}" {"-no-startup-window --win-session-start" if minimized else ""}'.strip()
+            #exe_path = f'"{sys.executable}" {"--hidden" if minimized else ""}'.strip()
 
             if system == "Windows":
                 self._set_windows_autostart(exe_path)
