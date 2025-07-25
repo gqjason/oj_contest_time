@@ -93,7 +93,7 @@ class AutoStartManager:
             key_root = winreg.HKEY_CURRENT_USER
             
             # 修正3：确保注册表值使用规范路径
-            reg_value = f'wscript.exe "{os.path.normpath(self.vbs_file_path)}"'
+            reg_value = f'"{os.path.normpath(self.vbs_file_path)}"'
             
             with winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE) as key:
                 winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, reg_value)
