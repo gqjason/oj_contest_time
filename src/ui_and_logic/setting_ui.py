@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -90,6 +91,15 @@ class SettingsDialog:
             width=10
         )
         cancel_button.pack(side=tk.RIGHT, fill=tk.X, padx=5)
+        
+        # 取消按钮
+        cancel_button = ttk.Button(
+            button_frame,
+            text="退出",
+            command=sys.exit(0),
+            width=10
+        )
+        cancel_button.pack(side=tk.LEFT, fill=tk.X, padx=5)
 
 
 
@@ -191,14 +201,14 @@ class SettingsDialog:
         )
         autostart_minimize_check.pack(anchor="w", pady=2)
 
-        # 是否最小化到后台运行
-        self.minimize_to_tray_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["minimize_to_tray"])
-        minimize_to_tray_check = ttk.Checkbutton(
-            frame,
-            text="最小化到后台运行",
-            variable=self.minimize_to_tray_var
-        )
-        minimize_to_tray_check.pack(anchor="w", pady=2)
+        # # 是否最小化到后台运行
+        # self.minimize_to_tray_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["minimize_to_tray"])
+        # minimize_to_tray_check = ttk.Checkbutton(
+        #     frame,
+        #     text="最小化到后台运行",
+        #     variable=self.minimize_to_tray_var
+        # )
+        # minimize_to_tray_check.pack(anchor="w", pady=2)
 
     # 比赛设置
     def create_contest_settings(self, frame):
