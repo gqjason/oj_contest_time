@@ -19,44 +19,38 @@ class AutoStartManager:
         self.vbs_file_path = os.path.join(self.vbs_path, f"{self.app_name}_silent_launcher.vbs")
         self.task_name = f"startup_{self.app_name}"
         self.task_path = f'wscript.exe \\"{self.vbs_file_path}"'
+    
     def apply(self, autostart: bool, minimized: bool):
         system = platform.system()
         self.logger.info(f"[AutoStartManager] 系统平台: {system}")
         try:
             if not autostart:
-                self._disable_autostart(system)
+                self.disable_autostart()
                 self.logger.info("[AutoStartManager] 已禁用开机启动")
                 return
 
-            exe_path = f'"{sys.executable}" {"-minimized" if minimized else ""}'.strip()
-            self.logger.info(f"[{file_name}][{self.class_name}] exe_path: {exe_path}")
-            
-            if system == "Windows":
-                self._set_windows_autostart(exe_path)
-            else:
-                self.logger.error(f"[AutoStartManager] 当前平台不支持自动启动设置: {system}")
+            self.logger.info(f"[{file_name}][{self.class_name}] exe_path: {self.exe_path}")
+
+            self.enable_autostart(minimized)
+
         except Exception as e:
             self.logger.error(f"[AutoStartManager] 设置失败: {e}")
 
-    def _set_windows_autostart(self, exe_path):
-        try:
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.key_path, 0, winreg.KEY_SET_VALUE)
-        except FileNotFoundError:
-            key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.key_path)
-        with key:
-            winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, exe_path)
-        self.logger.info(f"[AutoStartManager][_set_windows_autostart] 设置为: {exe_path}")
-
-    def _disable_autostart(self, system):
-        if system == "Windows":
-            try:
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.key_path, 0, winreg.KEY_SET_VALUE) as key:
-                    winreg.DeleteValue(key, self.app_name)
-                self.logger.info("[AutoStartManager] 已移除 Windows 启动项")
-            except FileNotFoundError:
-                pass
+    def enable_autostart(self, minimized):
+        self.create_vbs_regedit_script()  # 创建 VBScript 脚本
+        self.logger.info(f"[AutoStartManager] VBScript 文件已创建: {self.vbs_file_path}")
+        
+        if minimized:
+            self.register_task_scheduler()  # 注册任务计划程序
+            self.logger.info(f"[AutoStartManager] 任务计划程序已注册: {self.task_name}")
+        
+    def disable_autostart(self):
+        self.remove_vbs_regedit_script()  # 删除 VBScript 脚本
+        self.logger.info(f"[AutoStartManager] VBScript 文件已删除: {self.vbs_file_path}")
+        self.cancel_task_scheduler()  # 取消任务计划程序
+        self.logger.info(f"[AutoStartManager] 任务计划程序已取消: {self.task_name}")
     
-    def create_vbs_script(self):
+    def create_vbs_regedit_script(self):
 
         # 构造VBScript文件的路径
         # 将VBS脚本放在一个不容易被用户误删的地方，例如应用数据目录
@@ -111,7 +105,7 @@ class AutoStartManager:
             print(f"An error occurred: {e}")
             return False
 
-    def remove_autostart_silent(self):
+    def remove_vbs_regedit_script(self):
         """
         从注册表中移除程序的静默自动启动设置，并删除生成的VBS脚本。
 
@@ -124,8 +118,6 @@ class AutoStartManager:
         Returns:
             bool: 如果移除成功则返回 True，否则返回 False。
         """
-        vbs_dir = GAP().get_scripts_path()
-        
         try:
             # 尝试删除 VBScript 文件
             if os.path.exists(self.vbs_file_path):

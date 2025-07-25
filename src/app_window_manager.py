@@ -87,13 +87,8 @@ class AppWindowManager:
         self.background_worker.start()
         self.settings = GAP().load_settings()
         
-<<<<<<< HEAD
-        should_hide = "--hidden" in sys.argv or self.settings.get("autostart_minimize",False)
-        self.logger.debug(f"[{file_name}][{self.class_name}] 应用程序启动，隐藏状态: {should_hide}, 设置自启动最小化: {self.settings.get("autostart_minimize")}, 运行托盘: {self.settings.get("minimize_to_tray")}, should_hide: {should_hide}")
-=======
         should_hide = "--hidden" in sys.argv and self.settings.get("autostart_minimize", False)
         #self.logger.debug(f"[{file_name}][{self.class_name}] 应用程序启动，隐藏状态: {should_hide}, 设置自启动最小化: {self.settings.get("autostart_minimize")}, 运行托盘: {self.settings.get("minimize_to_tray")}, should_hide: {should_hide}")
->>>>>>> test2
         
         self.tray_manager.create_tray_icon()  # 初始化托盘
         self.logger.info(f"[{file_name}][{self.class_name}] 已创建托盘图标")
@@ -101,17 +96,9 @@ class AppWindowManager:
         self.apply_tray_behavior()
         self.logger.info(f"[{file_name}][{self.class_name}] 已运行self.apply_tray_behavior()")
 
-<<<<<<< HEAD
-        if self.settings.get("minimize_to_tray", False):
-            self.tray_manager.enable_running()  # 替换原 apply_tray_behavior
-
-        else:
-            self.root.deiconify()
-=======
         
         self.tray_manager.enable_running()  # 替换原 apply_tray_behavior
         self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)
->>>>>>> test2
 
         self.root.mainloop()
         
