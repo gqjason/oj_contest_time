@@ -87,7 +87,7 @@ class AppWindowManager:
         self.background_worker.start()
         self.settings = GAP().load_settings()
         
-        should_hide = "--hidden" in sys.argv or self.settings.get("autostart_minimize", False)
+        should_hide = "--hidden" in sys.argv and self.settings.get("autostart_minimize", False)
         #self.logger.debug(f"[{file_name}][{self.class_name}] 应用程序启动，隐藏状态: {should_hide}, 设置自启动最小化: {self.settings.get("autostart_minimize")}, 运行托盘: {self.settings.get("minimize_to_tray")}, should_hide: {should_hide}")
         
         self.tray_manager.create_tray_icon()  # 初始化托盘

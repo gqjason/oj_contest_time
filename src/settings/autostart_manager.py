@@ -22,7 +22,7 @@ class AutoStartManager:
                 self.logger.info("[AutoStartManager] 已禁用开机启动")
                 return
 
-            exe_path = f'"{sys.executable}" {"--hidden" if minimized else ""}'.strip()
+            exe_path = f'"{sys.executable}" {"-minimized" if minimized else ""}'.strip()
             self.logger.info(f"[{file_name}][{self.class_name}] exe_path: {exe_path}")
             
             if system == "Windows":
