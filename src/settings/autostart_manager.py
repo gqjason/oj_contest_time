@@ -5,7 +5,9 @@ import platform
 import winreg
 from logger import FileLogger
 
+file_name = "autostart_manager.py"
 class AutoStartManager:
+    class_name = "AutoStartManager"
     def __init__(self):
         self.logger = FileLogger()
         self.app_name = "CaptureOJContestTime"
@@ -20,9 +22,14 @@ class AutoStartManager:
                 self.logger.info("[AutoStartManager] 已禁用开机启动")
                 return
 
-            exe_path = f'"{sys.executable}" {"-no-startup-window --win-session-start" if minimized else ""}'.strip()
+            python_dir = os.path.dirname(sys.executable)
+            # 构建pythonw.exe的完整路径（无控制台窗口版本）
+            pythonw_path = os.path.join(python_dir, 'pythonw.exe')
+            #exe_path = f'"{sys.executable}" {"-no-startup-window --win-session-start" if minimized else ""}'.strip()
             #exe_path = f'"{sys.executable}" {"--hidden" if minimized else ""}'.strip()
-
+            exe_path = f'{sys.executable  if minimized else pythonw_path}'.strip()
+            self.logger.info(f"[{file_name}][{self.class_name}] exe_path: {exe_path}")
+            
             if system == "Windows":
                 self._set_windows_autostart(exe_path)
             else:
