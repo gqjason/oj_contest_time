@@ -4,10 +4,9 @@ import platform
 import subprocess
 from pathlib import Path
 
-from settings.minimize_to_tray import MinimizeToTray as MTT
+# from settings.minimize_to_tray import MinimizeToTray as MTT
 from settings.autostart_manager import AutoStartManager as ASM
 from settings.get_all_path import GetAllPath as GAP
-from information.update_contest_data import UpdateContestData as UCD
 from logger import FileLogger
 
 file_name = "setting_logic.py"
@@ -17,7 +16,7 @@ class SettingsManager:
     """管理应用程序设置的类"""
     DEFAULT_SETTINGS = {
         "autostart": False,
-        "minimize_to_tray": False,
+        # "minimize_to_tray": False,
         "autostart_minimize": False,
         
         "is_capture_codeforces": False,
@@ -31,7 +30,7 @@ class SettingsManager:
         
     }
 
-    def __init__(self, main_window=None, config_file=None):
+    def __init__(self, main_window=None):
         self.main_window = main_window
         self.logger = FileLogger()
 
@@ -91,7 +90,7 @@ class SettingsManager:
     def apply_settings(self, ui_instance):
         """将设置应用到UI界面"""
         ui_instance.autostart_var.set(self.get_setting("autostart"))
-        ui_instance.minimize_to_tray_var.set(self.get_setting("minimize_to_tray"))
+        # ui_instance.minimize_to_tray_var.set(self.get_setting("minimize_to_tray"))
         ui_instance.autostart_minimize_var.set(self.get_setting("autostart_minimize"))
         
         ui_instance.capturing_codeforces_var.set(self.get_setting("is_capture_codeforces"))
@@ -108,7 +107,7 @@ class SettingsManager:
         """处理保存按钮点击事件"""
         settings_data = {
             "autostart": ui_instance.autostart_var.get(),
-            "minimize_to_tray": ui_instance.minimize_to_tray_var.get(),
+            # "minimize_to_tray": ui_instance.minimize_to_tray_var.get(),
             "autostart_minimize": ui_instance.autostart_minimize_var.get(),
             
             "is_capture_codeforces": ui_instance.capturing_codeforces_var.get(),
@@ -135,7 +134,7 @@ class SettingsManager:
 
             autostart = self.settings.get("autostart", False)
             autostart_minimized = self.settings.get("autostart_minimize", False)
-            minimize_to_tray = self.settings.get("minimize_to_tray", False)
+            # minimize_to_tray = self.settings.get("minimize_to_tray", False)
             desktop_notify = self.settings.get("desktop_notify", False)
 
             # 合并开机启动逻辑
@@ -147,22 +146,20 @@ class SettingsManager:
                 self.logger.error(f"[{file_name}][{self.class_name}] 开机启动设置失败: {e}")
                 return False
 
-            # 最小化托盘逻辑
-            if self.main_window:
-                if minimize_to_tray:
-                    self.logger.info(f"[{file_name}][{self.class_name}] 启用最小化托盘...")
-                else:
-                    self.logger.info(f"[{file_name}][{self.class_name}] 禁用最小化托盘...")
-            else:
-                self.logger.warning(f"[{file_name}][{self.class_name}] 主窗口未设置，跳过最小化托盘设置")
+            # # 最小化托盘逻辑
+            # if self.main_window:
+            #     if minimize_to_tray:
+            #         self.logger.info(f"[{file_name}][{self.class_name}] 启用最小化托盘...")
+            #     else:
+            #         self.logger.info(f"[{file_name}][{self.class_name}] 禁用最小化托盘...")
+            # else:
+            #     self.logger.warning(f"[{file_name}][{self.class_name}] 主窗口未设置，跳过最小化托盘设置")
 
             # 桌面通知
             if desktop_notify:
                 self.logger.info(f"[{file_name}][{self.class_name}] 启用桌面通知...")
-                self.switch_system_notification(True)
             else:
                 self.logger.info(f"[{file_name}][{self.class_name}] 禁用桌面通知...")
-                self.switch_system_notification(False)
 
             self.logger.info(f"[{file_name}][{self.class_name}] 成功保存设置")
             return True
@@ -175,16 +172,7 @@ class SettingsManager:
     def handle_cancel(self, dialog):
         """处理取消按钮点击事件"""
         dialog.destroy()
-
-    def switch_system_notification(self, enable):
-        if enable:
-            try:
-                # 调用系统通知逻辑（待实现）
-                pass
-            except Exception as e:
-                self.logger.error(f"发送通知失败: {e}")
-                
-          
+                 
     def open_folder_in_explorer(self, path: str):
         """在操作系统的文件资源管理器中打开指定目录"""
         if not os.path.exists(path):

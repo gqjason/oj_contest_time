@@ -3,11 +3,9 @@
 import threading
 import time
 import random
-from datetime import datetime, timezone
 
 from logger import FileLogger
 from information.update_contest_data import UpdateContestData as UCD
-from ui_and_logic.setting_logic import SettingsManager as SM
 from settings.get_all_path import GetAllPath as GAP
 file_name = "background_worker.py"
 class AppBackgroundWorker:
@@ -37,9 +35,10 @@ class AppBackgroundWorker:
                     time_point_front = time_point_back
                     ucd.updating_data()
 
+                time.sleep(random.uniform(6,8))
                 current_settings = GAP().load_settings()
                 #self.logger.debug(f"[{file_name}][{self.class_name}][run] \"desktop_notify\" is {current_settings["desktop_notify"]}")
-                if current_settings["desktop_notify"]:
+                if current_settings.get("desktop_notify", False):
                     ucd.prepare_contest_notify()
             except Exception as e:
                 self.logger.error(f"[{file_name}][{self.class_name}][background_run] 运行时异常: {e}")

@@ -3,14 +3,22 @@ import os
 import sys
 import platform
 import winreg
+import getpass
+import subprocess
 from logger import FileLogger
-
+from settings.get_all_path import GetAllPath as GAP
+file_name = "autostart_manager.py"
 class AutoStartManager:
+    class_name = "AutoStartManager"
     def __init__(self):
         self.logger = FileLogger()
         self.app_name = "CaptureOJContestTime"
         self.key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-
+        self.exe_path = GAP().get_current_exe_path()
+        self.vbs_path = GAP().get_scripts_path()
+        self.vbs_file_path = os.path.join(self.vbs_path, f"{self.app_name}_silent_launcher.vbs")
+        self.task_name = f"startup_{self.app_name}"
+        self.task_path = f'wscript.exe \\"{self.vbs_file_path}"'
     def apply(self, autostart: bool, minimized: bool):
         system = platform.system()
         self.logger.info(f"[AutoStartManager] 系统平台: {system}")
@@ -20,8 +28,9 @@ class AutoStartManager:
                 self.logger.info("[AutoStartManager] 已禁用开机启动")
                 return
 
-            exe_path = f'"{sys.executable}" {"--hidden" if minimized else ""}'.strip()
-
+            exe_path = f'"{sys.executable}" {"-minimized" if minimized else ""}'.strip()
+            self.logger.info(f"[{file_name}][{self.class_name}] exe_path: {exe_path}")
+            
             if system == "Windows":
                 self._set_windows_autostart(exe_path)
             else:
@@ -46,3 +55,148 @@ class AutoStartManager:
                 self.logger.info("[AutoStartManager] 已移除 Windows 启动项")
             except FileNotFoundError:
                 pass
+    
+    def create_vbs_script(self):
+
+        # 构造VBScript文件的路径
+        # 将VBS脚本放在一个不容易被用户误删的地方，例如应用数据目录
+        # 如果你的exe也在同一目录，可以考虑将VBS放在exe同目录下
+        os.makedirs(self.vbs_path, exist_ok=True) # 确保目录存在
+        
+        # 构造 VBScript 内容
+        # 注意：在VBScript中，路径中的反斜杠需要转义，且整个路径字符串需要用双引号包裹
+        # 如果exe_path本身包含空格，那么在VBScript的Run命令中需要用额外的双引号包裹
+        # 例如："""C:\Program Files\My App\app.exe"""
+        exe_path_escaped_for_vbs = self.exe_path.replace("\\", "\\\\") # 在VBS中反斜杠不需要额外转义，但为了安全考虑，如果将来有特殊字符，这样处理更通用
+        
+        # 最终传递给WshShell.Run的字符串
+        # 假设exe_path可能包含空格，所以用额外的双引号包裹
+        run_command = f'"{self.exe_path}"'
+        
+        run_command += " --silent"
+
+        vbs_content = f"""
+    Set WshShell = WScript.CreateObject("WScript.Shell")
+    WshShell.Run "{run_command}", 0, False
+    """
+        # 移除VBS内容中的空行和多余空格，使其更紧凑
+        vbs_content = "\n".join([line.strip() for line in vbs_content.splitlines() if line.strip()])
+
+        try:
+            # 写入 VBScript 文件
+            with open(self.vbs_file_path, "w") as f:
+                f.write(vbs_content)
+            print(f"VBScript file created at: {self.vbs_file_path}")
+
+            # 写入注册表
+            key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+
+            key_root = winreg.HKEY_CURRENT_USER
+
+            # 打开或创建注册表键
+            key = winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE)
+            # 设置注册表值，值为VBScript的启动命令
+            # 注册表项的值直接是VBScript文件的完整路径
+            winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, f'wscript.exe "{self.vbs_file_path}"')
+            winreg.CloseKey(key)
+
+            self.logger.info(f"Successfully set '{self.app_name}' to autostart silently via VBScript.")
+            self.logger.info(f"Registry entry: {key_root}\\{key_path}\\{self.app_name} = wscript.exe \"{self.vbs_file_path}\"")
+            return True
+
+        except PermissionError:
+            print("Permission denied: You need administrator privileges to write to HKEY_LOCAL_MACHINE.")
+            return False
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return False
+
+    def remove_autostart_silent(self):
+        """
+        从注册表中移除程序的静默自动启动设置，并删除生成的VBS脚本。
+
+        Args:
+            app_name (str): 你的应用程序的名称，用于查找注册表项和VBS文件。
+            use_hklm (bool, optional): 如果为 True，则从 HKEY_LOCAL_MACHINE (所有用户)
+                                    注册表键中删除。
+                                    如果为 False，则从 HKEY_CURRENT_USER (当前用户) 中删除。
+                                    默认为 False。
+        Returns:
+            bool: 如果移除成功则返回 True，否则返回 False。
+        """
+        vbs_dir = GAP().get_scripts_path()
+        
+        try:
+            # 尝试删除 VBScript 文件
+            if os.path.exists(self.vbs_file_path):
+                os.remove(self.vbs_file_path)
+                self.logger.info(f"Removed VBScript file: {self.vbs_file_path}")
+            else:
+                self.logger.info(f"VBScript file not found: {self.vbs_file_path}")
+
+            # 尝试从注册表删除
+            key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+
+            key_root = winreg.HKEY_CURRENT_USER
+
+            try:
+                key = winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE)
+                winreg.DeleteValue(key, self.app_name)
+                winreg.CloseKey(key)
+                self.logger.info(f"Successfully removed '{self.app_name}' from autostart.")
+                return True
+            except FileNotFoundError: # 如果注册表键不存在
+                self.logger.warning(f"Registry entry for '{self.app_name}' not found.")
+                return True # 视为成功，因为它已经不在了
+            except PermissionError:
+                self.logger.error("Permission denied: You need administrator privileges to remove from HKEY_LOCAL_MACHINE.")
+                return False
+
+        except Exception as e:
+            self.logger.error(f"An error occurred during removal: {e}")
+            return False
+        
+    def register_task_scheduler(self):
+        cmd = [
+            "schtasks",
+            "/Create",
+            "/SC", "ONSTART",
+            "/DELAY", "0000:00:15",
+            "/TN", self.task_name,
+            "/TR", self.task_path,
+            "/RL", "HIGHEST",           # 最高权限运行
+            "/F",                       # 强制覆盖已有任务
+            "/RU", getpass.getuser(),   # 当前用户
+            
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            self.logger.info(f"任务 [startup_{self.app_name}] 创建成功。")
+        else:
+            self.logger.error(f"创建任务失败：{result.stderr}")
+            
+    def cancel_task_scheduler(self):
+        
+        # 查询任务是否存在
+        query_cmd = [
+            "schtasks",
+            "/Query",
+            "/TN", self.task_name
+        ]
+        query_result = subprocess.run(query_cmd, capture_output=True, text=True)
+
+        if query_result.returncode != 0:
+            self.logger.warning(f"任务 [startup_{self.app_name}] 不存在，跳过取消。")
+            return
+        cmd = [
+            "schtasks",
+            "/Delete",
+            "/TN", self.task_name,
+            "/F"  # 强制删除
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            self.logger.info(f"任务 [startup_{self.app_name}] 取消成功。")
+        else:
+            self.logger.error(f"取消任务失败：{result.stderr}")

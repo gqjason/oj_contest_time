@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -8,8 +9,8 @@ def temp():pass
 
 file_name = "setting_ui.py"
 class SettingsDialog:
-    
     class_name = "SettingsDialog"
+    
     """设置对话框类"""
     def __init__(self, parent, settings_manager):
         """
@@ -23,21 +24,25 @@ class SettingsDialog:
         self.settings_manager = settings_manager
         self.logger = FileLogger()
         
-        # 创建对话框
-        self.dialog = tk.Toplevel(parent)
-        self.dialog.title("设置")
-        self.dialog.geometry("500x450")
-        self.dialog.transient(parent)
-        self.dialog.grab_set()
-        self.dialog.resizable(True, True)
+        try:
+            # 创建对话框
+            self.dialog = tk.Toplevel(parent)
+            self.dialog.title("设置")
+            self.dialog.geometry("500x450")
+            self.dialog.transient(parent)
+            self.dialog.grab_set()
+            self.dialog.resizable(True, True)
+            
+            self.create_setting_widgets()
+            self.center_window(self.dialog, parent)
+            
+            # 应用当前设置到UI
+            self.settings_manager.apply_settings(self)
+            self.logger.info(f"[{file_name}][{self.class_name}] 创建设置窗口成功")
         
-        self.create_setting_widgets()
-        self.center_window(self.dialog, parent)
-        
-        # 应用当前设置到UI
-        self.settings_manager.apply_settings(self)
-        
-        
+        except Exception as e:
+            self.logger.error(f"[{file_name}][{self.class_name}][__init__] 创建设置窗口失败, 原因: {e}")
+
     def create_setting_widgets(self):
         setting_frame = ttk.Frame(self.dialog)
         setting_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -90,6 +95,15 @@ class SettingsDialog:
             width=10
         )
         cancel_button.pack(side=tk.RIGHT, fill=tk.X, padx=5)
+        
+        # 取消按钮
+        exit_button = ttk.Button(
+            button_frame,
+            text="退出",
+            command=self.handle_exit,
+            width=10
+        )
+        exit_button.pack(side=tk.LEFT, fill=tk.X, padx=5)
 
 
 
@@ -97,9 +111,8 @@ class SettingsDialog:
         """处理保存按钮点击事件"""
         if self.settings_manager.handle_save(self):
             messagebox.showinfo("成功", "设置已保存并应用")
-            self.logger.info(
-                f"[{file_name}][{self.class_name}] 设置已保存并应用"
-                )
+            self.logger.info(f"[{file_name}][{self.class_name}] 设置已保存并应用")
+            
             self.dialog.destroy()
             UCD().updating_data()  # 更新要通知的比赛数据
         else:
@@ -111,6 +124,9 @@ class SettingsDialog:
     def handle_cancel(self):
         """处理取消按钮点击事件"""
         self.settings_manager.handle_cancel(self.dialog)
+        
+    def handle_exit(self):
+        sys.exit(0)
     
     #主窗口
     def center_window(self, child, parent):
@@ -191,14 +207,14 @@ class SettingsDialog:
         )
         autostart_minimize_check.pack(anchor="w", pady=2)
 
-        # 是否最小化到后台运行
-        self.minimize_to_tray_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["minimize_to_tray"])
-        minimize_to_tray_check = ttk.Checkbutton(
-            frame,
-            text="最小化到后台运行",
-            variable=self.minimize_to_tray_var
-        )
-        minimize_to_tray_check.pack(anchor="w", pady=2)
+        # # 是否最小化到后台运行
+        # self.minimize_to_tray_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["minimize_to_tray"])
+        # minimize_to_tray_check = ttk.Checkbutton(
+        #     frame,
+        #     text="最小化到后台运行",
+        #     variable=self.minimize_to_tray_var
+        # )
+        # minimize_to_tray_check.pack(anchor="w", pady=2)
 
     # 比赛设置
     def create_contest_settings(self, frame):
