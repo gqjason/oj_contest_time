@@ -54,12 +54,13 @@ class AutoStartManager:
 
         os.makedirs(self.vbs_path, exist_ok=True) # 确保目录存在
         # 最终传递给WshShell.Run的字符串
-        run_command_quoted = f'"{self.exe_path} --silent"' # 确保整个命令字符串被双引号包裹
+        run_command = f'"{self.exe_path}" --silent'
+        run_command_escaped = run_command.replace('"', '""')
         vbs_content = f"""
-        Set WshShell = WScript.CreateObject("WScript.Shell")
-        WshShell.Run "{run_command_quoted}", 0, False
+Set WshShell = WScript.CreateObject("WScript.Shell")
+WshShell.Run "{run_command_escaped}", 0, False
         """
-        # 移除VBS内容中的空行和多余空格，使其更紧凑
+        # 清理空白行（保留原有格式）
         vbs_content = "\n".join(
             [line.strip() for line in vbs_content.splitlines() if line.strip()]
         )
