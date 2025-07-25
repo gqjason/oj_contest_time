@@ -9,6 +9,7 @@ from ui_and_logic.main_logic import AppLogic
 from ui_and_logic.main_ui import AppUI
 from settings.minimize_to_tray import MinimizeToTray
 from settings.get_all_path import GetAllPath as GAP
+from settings.autostart_manager import AutoStartManager as ASM
 from logger import FileLogger
 from background_worker import AppBackgroundWorker as ABW
 
@@ -84,6 +85,7 @@ class AppWindowManager:
             self.logger.warning(f"[{file_name}][{self.class_name}] 托盘图标已在运行，无法启动新实例。")
             self.kill_tray_icon_process(count_process_name,process_name=current_process_name)
         
+        ASM().apply(self.settings.get("autostart", False), self.settings.get("autostart_minimize", False))
         self.background_worker.start()
         self.settings = GAP().load_settings()
         
@@ -98,8 +100,8 @@ class AppWindowManager:
 
         
         self.tray_manager.enable_running()  # 替换原 apply_tray_behavior
-        self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)
-
+        # self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)
+        self.logger.info(f"[{file_name}][{self.class_name}] 应用程序已启动，主窗口标题: {self.root.title()}")
         self.root.mainloop()
-        
+        self.logger.info(f"[{file_name}][{self.class_name}] 应用程序主循环已结束")
         self.background_worker.stop()

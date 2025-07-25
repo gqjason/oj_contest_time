@@ -19,22 +19,20 @@ class AutoStartManager:
         self.vbs_file_path = os.path.join(self.vbs_path, f"{self.app_name}_silent_launcher.vbs")
         self.task_name = f"startup_{self.app_name}"
         self.task_path = f'wscript.exe \\"{self.vbs_file_path}"'
+    
     def apply(self, autostart: bool, minimized: bool):
         system = platform.system()
         self.logger.info(f"[AutoStartManager] 系统平台: {system}")
         try:
             if not autostart:
-                self._disable_autostart(system)
+                self.disable_autostart()
                 self.logger.info("[AutoStartManager] 已禁用开机启动")
                 return
 
-            exe_path = f'"{sys.executable}" {"-minimized" if minimized else ""}'.strip()
-            self.logger.info(f"[{file_name}][{self.class_name}] exe_path: {exe_path}")
-            
-            if system == "Windows":
-                self._set_windows_autostart(exe_path)
-            else:
-                self.logger.error(f"[AutoStartManager] 当前平台不支持自动启动设置: {system}")
+            self.logger.info(f"[{file_name}][{self.class_name}] exe_path: {self.exe_path}")
+
+            self.enable_autostart(minimized)
+
         except Exception as e:
             self.logger.error(f"[AutoStartManager] 设置失败: {e}")
 
@@ -92,7 +90,6 @@ class AutoStartManager:
 
             # 写入注册表
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-
             key_root = winreg.HKEY_CURRENT_USER
             
             # 修正3：确保注册表值使用规范路径
@@ -111,21 +108,7 @@ class AutoStartManager:
             self.logger.error(f"Error creating VBS/registry entry: {str(e)}")
             return False
 
-    def remove_autostart_silent(self):
-        """
-        从注册表中移除程序的静默自动启动设置，并删除生成的VBS脚本。
-
-        Args:
-            app_name (str): 你的应用程序的名称，用于查找注册表项和VBS文件。
-            use_hklm (bool, optional): 如果为 True，则从 HKEY_LOCAL_MACHINE (所有用户)
-                                    注册表键中删除。
-                                    如果为 False，则从 HKEY_CURRENT_USER (当前用户) 中删除。
-                                    默认为 False。
-        Returns:
-            bool: 如果移除成功则返回 True，否则返回 False。
-        """
-        vbs_dir = GAP().get_scripts_path()
-        
+    def remove_vbs_regedit_script(self):
         try:
             # 尝试删除 VBScript 文件
             if os.path.exists(self.vbs_file_path):
@@ -136,7 +119,6 @@ class AutoStartManager:
 
             # 尝试从注册表删除
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-
             key_root = winreg.HKEY_CURRENT_USER
 
             try:
@@ -145,6 +127,7 @@ class AutoStartManager:
                 winreg.CloseKey(key)
                 self.logger.info(f"Successfully removed '{self.app_name}' from autostart.")
                 return True
+            
             except FileNotFoundError: # 如果注册表键不存在
                 self.logger.warning(f"Registry entry for '{self.app_name}' not found.")
                 return True # 视为成功，因为它已经不在了
@@ -161,7 +144,7 @@ class AutoStartManager:
             "schtasks",
             "/Create",
             "/SC", "ONSTART",
-            "/DELAY", "0000:00:15",
+            "/DELAY", "0000:05",  # 延迟5秒启动
             "/TN", self.task_name,
             "/TR", self.task_path,
             "/RL", "HIGHEST",           # 最高权限运行
@@ -172,10 +155,10 @@ class AutoStartManager:
         
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
-            self.logger.info(f"任务 [startup_{self.app_name}] 创建成功。")
+            self.logger.info(f"[{file_name}][{self.class_name}] 任务 [startup_{self.app_name}] 创建成功。")
         else:
-            self.logger.error(f"创建任务失败：{result.stderr}")
-            
+            self.logger.error(f"[{file_name}][{self.class_name}][create_task_scheduler] 创建任务失败：{result.stderr}")
+
     def cancel_task_scheduler(self):
         
         # 查询任务是否存在
@@ -187,7 +170,7 @@ class AutoStartManager:
         query_result = subprocess.run(query_cmd, capture_output=True, text=True)
 
         if query_result.returncode != 0:
-            self.logger.warning(f"任务 [startup_{self.app_name}] 不存在，跳过取消。")
+            self.logger.warning(f"[{file_name}][{self.class_name}] 任务 [startup_{self.app_name}] 不存在，跳过取消。")
             return
         cmd = [
             "schtasks",
@@ -197,6 +180,6 @@ class AutoStartManager:
         ]
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
-            self.logger.info(f"任务 [startup_{self.app_name}] 取消成功。")
+            self.logger.info(f"[{file_name}][{self.class_name}] 任务 [startup_{self.app_name}] 取消成功。")
         else:
-            self.logger.error(f"取消任务失败：{result.stderr}")
+            self.logger.error(f"[{file_name}][{self.class_name}][cancel_task_scheduler] 取消任务失败：{result.stderr}")

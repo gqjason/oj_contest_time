@@ -26,8 +26,6 @@ class MinimizeToTray:
     def on_close(self):
         """关闭窗口时最小化到托盘"""
         self.window.withdraw()
-        if not self.tray_icon:
-            self.create_tray_icon()
 
     def create_tray_icon(self):
         self.logger.info(f"[{file_name}][{self.class_name}][create_tray_icon] self.tray_icon: {str(self.tray_icon)}")
