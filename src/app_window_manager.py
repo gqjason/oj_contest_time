@@ -100,8 +100,8 @@ class AppWindowManager:
 
         
         self.tray_manager.enable_running()  # 替换原 apply_tray_behavior
-        self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)
-
+        # self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)
+        self.logger.info(f"[{file_name}][{self.class_name}] 应用程序已启动，主窗口标题: {self.root.title()}")
         self.root.mainloop()
-        
+        self.logger.info(f"[{file_name}][{self.class_name}] 应用程序主循环已结束")
         self.background_worker.stop()

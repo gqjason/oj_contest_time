@@ -66,7 +66,7 @@ class AutoStartManager:
             # 写入 VBScript 文件
             with open(self.vbs_file_path, "w") as f:
                 f.write(vbs_content)
-            print(f"VBScript file created at: {self.vbs_file_path}")
+            self.logger.info(f"[{file_name}][{self.class_name}] VBScript file created at: {self.vbs_file_path}")
 
             # 写入注册表
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
@@ -75,15 +75,15 @@ class AutoStartManager:
             winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, f'wscript.exe "{self.vbs_file_path}"')
             winreg.CloseKey(key)
 
-            self.logger.info(f"Successfully set '{self.app_name}' to autostart silently via VBScript.")
-            self.logger.info(f"Registry entry: {key_root}\\{key_path}\\{self.app_name} = wscript.exe \"{self.vbs_file_path}\"")
+            self.logger.info(f"[{file_name}][{self.class_name}] Successfully set '{self.app_name}' to autostart silently via VBScript.")
+            self.logger.info(f"[{file_name}][{self.class_name}] Registry entry: {key_root}\\{key_path}\\{self.app_name} = wscript.exe \"{self.vbs_file_path}\"")
             return True
 
         except PermissionError:
-            print("Permission denied: You need administrator privileges to write to HKEY_LOCAL_MACHINE.")
+            self.logger.warning(f"[{file_name}][{self.class_name}][create_vbs_regedit_script] Permission denied: You need administrator privileges to write to HKEY_LOCAL_MACHINE.")
             return False
         except Exception as e:
-            print(f"An error occurred: {e}")
+            self.logger.error(f"[{file_name}][{self.class_name}][create_vbs_regedit_script] An error occurred: {e}")
             return False
 
     def remove_vbs_regedit_script(self):
@@ -122,8 +122,7 @@ class AutoStartManager:
             "schtasks",
             "/Create",
             "/SC", "ONSTART",
-            "/DELAY", "PT5S",  # 延迟5秒启动
-            "/Z",                # 任务在系统启动时运行
+            "/DELAY", "0000:05",  # 延迟5秒启动
             "/TN", self.task_name,
             "/TR", self.task_path,
             "/RL", "HIGHEST",           # 最高权限运行
@@ -134,10 +133,10 @@ class AutoStartManager:
         
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
-            self.logger.info(f"任务 [startup_{self.app_name}] 创建成功。")
+            self.logger.info(f"[{file_name}][{self.class_name}] 任务 [startup_{self.app_name}] 创建成功。")
         else:
-            self.logger.error(f"创建任务失败：{result.stderr}")
-            
+            self.logger.error(f"[{file_name}][{self.class_name}][create_task_scheduler] 创建任务失败：{result.stderr}")
+
     def cancel_task_scheduler(self):
         
         # 查询任务是否存在
@@ -149,7 +148,7 @@ class AutoStartManager:
         query_result = subprocess.run(query_cmd, capture_output=True, text=True)
 
         if query_result.returncode != 0:
-            self.logger.warning(f"任务 [startup_{self.app_name}] 不存在，跳过取消。")
+            self.logger.warning(f"[{file_name}][{self.class_name}] 任务 [startup_{self.app_name}] 不存在，跳过取消。")
             return
         cmd = [
             "schtasks",
@@ -159,6 +158,6 @@ class AutoStartManager:
         ]
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
-            self.logger.info(f"任务 [startup_{self.app_name}] 取消成功。")
+            self.logger.info(f"[{file_name}][{self.class_name}] 任务 [startup_{self.app_name}] 取消成功。")
         else:
-            self.logger.error(f"取消任务失败：{result.stderr}")
+            self.logger.error(f"[{file_name}][{self.class_name}][cancel_task_scheduler] 取消任务失败：{result.stderr}")
