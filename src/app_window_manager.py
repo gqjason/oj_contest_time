@@ -100,12 +100,13 @@ class AppWindowManager:
 
 
         if self.settings.get("minimize_to_tray", False):
-            self.logger.info(f"[{file_name}][{self.class_name}] minimize_to_tray: {self.settings.get("minimize_to_tray", False)}")
+            self.logger.info(f"[{file_name}][{self.class_name}] True minimize_to_tray: {self.settings.get("minimize_to_tray", False)}")
             self.tray_manager.enable_running()  # 替换原 apply_tray_behavior
             self.logger.info(f"[{file_name}][{self.class_name}] 已运行self.tray_manager.enable_running() ")
 
 
         else:
+            self.logger.info(f"[{file_name}][{self.class_name}] False minimize_to_tray: {self.settings.get("minimize_to_tray", False)}")
             self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)
 
         self.root.mainloop()

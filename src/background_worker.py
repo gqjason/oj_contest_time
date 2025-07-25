@@ -39,7 +39,7 @@ class AppBackgroundWorker:
 
                 current_settings = GAP().load_settings()
                 #self.logger.debug(f"[{file_name}][{self.class_name}][run] \"desktop_notify\" is {current_settings["desktop_notify"]}")
-                if current_settings["desktop_notify"]:
+                if current_settings.get("desktop_notify", False):
                     ucd.prepare_contest_notify()
             except Exception as e:
                 self.logger.error(f"[{file_name}][{self.class_name}][background_run] 运行时异常: {e}")
