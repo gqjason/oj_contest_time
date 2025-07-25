@@ -38,77 +38,77 @@ class AutoStartManager:
         except Exception as e:
             self.logger.error(f"[AutoStartManager] 设置失败: {e}")
 
-    def _set_windows_autostart(self, exe_path):
-        try:
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.key_path, 0, winreg.KEY_SET_VALUE)
-        except FileNotFoundError:
-            key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.key_path)
-        with key:
-            winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, exe_path)
-        self.logger.info(f"[AutoStartManager][_set_windows_autostart] 设置为: {exe_path}")
-
-    def _disable_autostart(self, system):
-        if system == "Windows":
-            try:
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.key_path, 0, winreg.KEY_SET_VALUE) as key:
-                    winreg.DeleteValue(key, self.app_name)
-                self.logger.info("[AutoStartManager] 已移除 Windows 启动项")
-            except FileNotFoundError:
-                pass
+    def enable_autostart(self, minimized):
+        self.create_vbs_regedit_script()  # 创建 VBScript 脚本
+        self.logger.info(f"[AutoStartManager] VBScript 文件已创建: {self.vbs_file_path}")
+        
+        if minimized:
+            self.register_task_scheduler()  # 注册任务计划程序
+            self.logger.info(f"[AutoStartManager] 任务计划程序已注册: {self.task_name}")
+        
+    def disable_autostart(self):
+        self.remove_vbs_regedit_script()  # 删除 VBScript 脚本
+        self.logger.info(f"[AutoStartManager] VBScript 文件已删除: {self.vbs_file_path}")
+        self.cancel_task_scheduler()  # 取消任务计划程序
+        self.logger.info(f"[AutoStartManager] 任务计划程序已取消: {self.task_name}")
     
-    def create_vbs_script(self):
-
-        # 构造VBScript文件的路径
-        # 将VBS脚本放在一个不容易被用户误删的地方，例如应用数据目录
-        # 如果你的exe也在同一目录，可以考虑将VBS放在exe同目录下
-        os.makedirs(self.vbs_path, exist_ok=True) # 确保目录存在
+    def create_vbs_regedit_script(self):
+        # 确保路径是规范的绝对路径（避免重复盘符）
+        self.vbs_file_path = os.path.normpath(self.vbs_file_path)
         
-        # 构造 VBScript 内容
-        # 注意：在VBScript中，路径中的反斜杠需要转义，且整个路径字符串需要用双引号包裹
-        # 如果exe_path本身包含空格，那么在VBScript的Run命令中需要用额外的双引号包裹
-        # 例如："""C:\Program Files\My App\app.exe"""
-        exe_path_escaped_for_vbs = self.exe_path.replace("\\", "\\\\") # 在VBS中反斜杠不需要额外转义，但为了安全考虑，如果将来有特殊字符，这样处理更通用
+        # 确保目录存在
+        os.makedirs(os.path.dirname(self.vbs_file_path), exist_ok=True)
         
-        # 最终传递给WshShell.Run的字符串
-        # 假设exe_path可能包含空格，所以用额外的双引号包裹
-        run_command = f'"{self.exe_path}"'
+        # 修正1：确保exe_path是绝对路径
+        self.exe_path = os.path.abspath(self.exe_path)
         
-        run_command += " --silent"
-
+        # 修正2：正确构建和转义命令字符串
+        # 仅包裹可执行文件路径（不包括参数）
+        exe_path_quoted = f'"{self.exe_path}"'
+        # VBScript中双引号需要转义为两个双引号
+        exe_path_escaped = exe_path_quoted.replace('"', '""')
+        # 完整命令：转义后的路径 + 参数
+        run_command = f"{exe_path_escaped} --silent"
+        
+        # 构建VBScript内容
         vbs_content = f"""
     Set WshShell = WScript.CreateObject("WScript.Shell")
     WshShell.Run "{run_command}", 0, False
-    """
-        # 移除VBS内容中的空行和多余空格，使其更紧凑
-        vbs_content = "\n".join([line.strip() for line in vbs_content.splitlines() if line.strip()])
-
+        """
+        
+        # 清理空白行
+        vbs_content = "\n".join(
+            [line.strip() for line in vbs_content.splitlines() if line.strip()]
+        )
+        
         try:
-            # 写入 VBScript 文件
+            # 写入 VBScript 文件前记录内容
+            self.logger.debug(f"VBScript content:\n{vbs_content}")
+            
+            # 写入文件
             with open(self.vbs_file_path, "w") as f:
                 f.write(vbs_content)
-            print(f"VBScript file created at: {self.vbs_file_path}")
+            self.logger.info(f"VBScript file created at: {self.vbs_file_path}")
 
             # 写入注册表
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
 
             key_root = winreg.HKEY_CURRENT_USER
-
-            # 打开或创建注册表键
-            key = winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE)
-            # 设置注册表值，值为VBScript的启动命令
-            # 注册表项的值直接是VBScript文件的完整路径
-            winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, f'wscript.exe "{self.vbs_file_path}"')
-            winreg.CloseKey(key)
-
-            self.logger.info(f"Successfully set '{self.app_name}' to autostart silently via VBScript.")
-            self.logger.info(f"Registry entry: {key_root}\\{key_path}\\{self.app_name} = wscript.exe \"{self.vbs_file_path}\"")
+            
+            # 修正3：确保注册表值使用规范路径
+            reg_value = f'wscript.exe "{os.path.normpath(self.vbs_file_path)}"'
+            
+            with winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE) as key:
+                winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, reg_value)
+            
+            self.logger.info(f"Added registry entry: {key_root}\\{key_path}\\{self.app_name} = {reg_value}")
             return True
 
         except PermissionError:
-            print("Permission denied: You need administrator privileges to write to HKEY_LOCAL_MACHINE.")
+            self.logger.error("Permission denied: Need admin rights for HKLM writes")
             return False
         except Exception as e:
-            print(f"An error occurred: {e}")
+            self.logger.error(f"Error creating VBS/registry entry: {str(e)}")
             return False
 
     def remove_autostart_silent(self):
