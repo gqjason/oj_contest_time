@@ -51,41 +51,61 @@ class AutoStartManager:
         self.logger.info(f"[AutoStartManager] 任务计划程序已取消: {self.task_name}")
     
     def create_vbs_regedit_script(self):
-
-        os.makedirs(self.vbs_path, exist_ok=True) # 确保目录存在
-        # 最终传递给WshShell.Run的字符串
-        run_command = f'"{self.exe_path}" --silent'
-        run_command_escaped = run_command.replace('"', '""')
+        # 确保路径是规范的绝对路径（避免重复盘符）
+        self.vbs_file_path = os.path.normpath(self.vbs_file_path)
+        
+        # 确保目录存在
+        os.makedirs(os.path.dirname(self.vbs_file_path), exist_ok=True)
+        
+        # 修正1：确保exe_path是绝对路径
+        self.exe_path = os.path.abspath(self.exe_path)
+        
+        # 修正2：正确构建和转义命令字符串
+        # 仅包裹可执行文件路径（不包括参数）
+        exe_path_quoted = f'"{self.exe_path}"'
+        # VBScript中双引号需要转义为两个双引号
+        exe_path_escaped = exe_path_quoted.replace('"', '""')
+        # 完整命令：转义后的路径 + 参数
+        run_command = f"{exe_path_escaped} --silent"
+        
+        # 构建VBScript内容
         vbs_content = f"""
-Set WshShell = WScript.CreateObject("WScript.Shell")
-WshShell.Run "{run_command_escaped}", 0, False
+    Set WshShell = WScript.CreateObject("WScript.Shell")
+    WshShell.Run "{run_command}", 0, False
         """
-        # 清理空白行（保留原有格式）
+        
+        # 清理空白行
         vbs_content = "\n".join(
             [line.strip() for line in vbs_content.splitlines() if line.strip()]
         )
+        
         try:
-            # 写入 VBScript 文件
+            # 写入 VBScript 文件前记录内容
+            self.logger.debug(f"VBScript content:\n{vbs_content}")
+            
+            # 写入文件
             with open(self.vbs_file_path, "w") as f:
                 f.write(vbs_content)
-            self.logger.info(f"[{file_name}][{self.class_name}] VBScript file created at: {self.vbs_file_path}")
+            self.logger.info(f"VBScript file created at: {self.vbs_file_path}")
 
             # 写入注册表
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
             key_root = winreg.HKEY_CURRENT_USER
-            key = winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE)
-            winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, f'wscript.exe "{self.vbs_file_path}"')
-            winreg.CloseKey(key)
-
-            self.logger.info(f"[{file_name}][{self.class_name}] Successfully set '{self.app_name}' to autostart silently via VBScript.")
-            self.logger.info(f"[{file_name}][{self.class_name}] Registry entry: {key_root}\\{key_path}\\{self.app_name} = wscript.exe \"{self.vbs_file_path}\"")
+            
+            # 修正3：确保注册表值使用规范路径
+            reg_value = f'wscript.exe "{os.path.normpath(self.vbs_file_path)}"'
+            
+            with winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE) as key:
+                winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, reg_value)
+            
+            self.logger.info(f"Added registry entry: {key_root}\\{key_path}\\{self.app_name} = {reg_value}")
             return True
 
         except PermissionError:
-            self.logger.warning(f"[{file_name}][{self.class_name}][create_vbs_regedit_script] Permission denied: You need administrator privileges to write to HKEY_LOCAL_MACHINE.")
+            self.logger.error("Permission denied: Need admin rights for HKLM writes")
             return False
         except Exception as e:
-            self.logger.error(f"[{file_name}][{self.class_name}][create_vbs_regedit_script] An error occurred: {e}")
+            self.logger.error(f"Error creating VBS/registry entry: {str(e)}")
             return False
 
     def remove_vbs_regedit_script(self):
