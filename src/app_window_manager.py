@@ -93,11 +93,9 @@ class AppWindowManager:
         self.tray_manager.create_tray_icon()  # 初始化托盘
         self.logger.info(f"[{file_name}][{self.class_name}] 已创建托盘图标")
 
-        self.apply_tray_behavior
+        self.apply_tray_behavior()
         self.logger.info(f"[{file_name}][{self.class_name}] 已运行self.apply_tray_behavior()")
 
-        if should_hide:
-            self.root.withdraw()
         
         self.tray_manager.enable_running()  # 替换原 apply_tray_behavior
         self.root.protocol("WM_DELETE_WINDOW", self.root.destroy)

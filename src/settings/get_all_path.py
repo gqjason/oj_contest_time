@@ -22,6 +22,10 @@ class GetAllPath:
         logs_path = self.base_path / "logs"
         return logs_path
     
+    def get_scripts_path(self):
+        scripts_path = self.base_path / "scripts"
+        return scripts_path
+    
     def get_resource_path(self, relative_path):
         if getattr(sys, 'frozen', False):
             base_path = sys._MEIPASS # type: ignore
@@ -40,3 +44,11 @@ class GetAllPath:
         except Exception as e:
             messagebox.showinfo(f"[{file_name}][{self.class_name}]", f"[load_settings] 无法加载设置: {e}")
             return {}
+        
+    def get_current_exe_path(self):
+        
+        if getattr(sys, 'frozen', False):
+            return os.path.abspath(sys.executable)# PyInstaller 打包后的路径
+        else:
+            return os.path.abspath(__file__)
+        
