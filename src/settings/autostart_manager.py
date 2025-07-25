@@ -18,7 +18,7 @@ class AutoStartManager:
         self.vbs_path = GAP().get_scripts_path()
         self.vbs_file_path = os.path.join(self.vbs_path, f"{self.app_name}_silent_launcher.vbs")
         self.task_name = f"startup_{self.app_name}"
-        self.task_path = f'wscript.exe \\"{self.vbs_file_path}"'
+        self.task_path = f'{self.vbs_file_path}'
     
     def apply(self, autostart: bool, minimized: bool):
         system = platform.system()
