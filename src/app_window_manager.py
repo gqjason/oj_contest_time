@@ -69,8 +69,6 @@ class AppWindowManager:
                 except Exception as e:
                     self.logger.error(f"[{file_name}][{self.class_name}] 无法结束进程 {proc.info['name']}：{e}")
                     
-        
-
     def get_current_exe_name(self):
         return os.path.basename(sys.executable)
 

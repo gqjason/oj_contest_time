@@ -101,7 +101,7 @@ class SettingsDialog:
                 f"[{file_name}][{self.class_name}] 设置已保存并应用"
                 )
             self.dialog.destroy()
-            UCD().update_contest_data()  # 更新要通知的比赛数据
+            UCD().updating_data()  # 更新要通知的比赛数据
         else:
             messagebox.showerror("错误", "保存设置失败")
             self.logger.error(
@@ -292,7 +292,7 @@ class SettingsDialog:
         target_config_path = GAP().get_settings_path().parent
         self.settings_manager.open_folder_in_explorer(target_config_path)
     def open_logs_file(self):
-        target_logs_path = self.logger.log_dir
+        target_logs_path = GAP().get_logs_path()
         self.settings_manager.open_folder_in_explorer(target_logs_path)
         
         

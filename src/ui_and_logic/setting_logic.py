@@ -129,7 +129,6 @@ class SettingsManager:
 
 
     def apply_system_settings(self):
-        mtt = MTT(self.main_window) # type: ignore
         asm = ASM()
         try:
             self.logger.info(f"[{file_name}][{self.class_name}] 正在应用系统设置...")
@@ -152,10 +151,8 @@ class SettingsManager:
             if self.main_window:
                 if minimize_to_tray:
                     self.logger.info(f"[{file_name}][{self.class_name}] 启用最小化托盘...")
-                    mtt.enable_running()
                 else:
                     self.logger.info(f"[{file_name}][{self.class_name}] 禁用最小化托盘...")
-                    mtt.disable_running()
             else:
                 self.logger.warning(f"[{file_name}][{self.class_name}] 主窗口未设置，跳过最小化托盘设置")
 

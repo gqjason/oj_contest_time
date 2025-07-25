@@ -39,6 +39,7 @@ class MinimizeToTray:
                 pystray.MenuItem("退出", self.on_quit)
             )
             self.tray_icon = pystray.Icon("App", image, "应用正在后台运行", menu)
+            self.logger.info(f"[{file_name}][{self.class_name}][create_tray_icon] 已创建托盘图标 self.tray_icon: {str(self.tray_icon)}")
             threading.Thread(target=self.tray_icon.run, daemon=True).start()
 
     def remove_tray_icon(self):
