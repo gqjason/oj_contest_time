@@ -32,7 +32,6 @@ class AppWindowManager:
         """托盘逻辑统一放在 run 中处理"""
         self.tray_manager.enable_running()
         
-    
     def is_window_running(self, window_title):
         """检查是否存在指定标题的窗口"""
         def enum_handler(hwnd, result):
@@ -44,8 +43,6 @@ class AppWindowManager:
         win32gui.EnumWindows(enum_handler, windows)
         self.logger.info(f"[{file_name}][{self.class_name}] 有{len(windows)}个程序窗口正在运行")
         return len(windows) > 0
-
-
 
     def is_tray_icon_running(self, process_name="main.exe"):
         count_process_name = 0
@@ -60,10 +57,11 @@ class AppWindowManager:
     # 如果发现已有托盘进程，则强制结束
     def kill_tray_icon_process(self, count_process_name, process_name="main.exe"):
         for proc in psutil.process_iter(['pid', 'name']):
-            if proc.info['name'] == process_name and count_process_name > 3:
+            if proc.info['name'] == process_name and count_process_name > 2:
                 try:
                     proc.kill()
                     proc.wait(timeout=0.5)  # 等待结束
+                    count_process_name -= 1
                     self.logger.info(f"[{file_name}][{self.class_name}] 已结束进程：{process_name} (PID={proc.pid})")
                     
                 except Exception as e:
@@ -77,20 +75,23 @@ class AppWindowManager:
         window_title = self.root.title()  # 获取标题字符串
         current_process_name = self.get_current_exe_name()
         count_process_name = self.is_tray_icon_running(process_name=current_process_name)
-        if count_process_name > 3:
-            self.logger.warning(f"[{file_name}][{self.class_name}] 托盘图标已在运行，无法启动新实例。")
-            self.kill_tray_icon_process(count_process_name,process_name=current_process_name)
         
         if self.is_window_running(window_title):
             self.logger.warning(f"[{file_name}][{self.class_name}] 应用程序已在运行，无法启动新实例。")
             sys.exit(0)
+            
+        if count_process_name > 2:
+            self.logger.warning(f"[{file_name}][{self.class_name}] 托盘图标已在运行，无法启动新实例。")
+            self.kill_tray_icon_process(count_process_name,process_name=current_process_name)
+        
+        
         
         
         self.background_worker.start()
         self.settings = GAP().load_settings()
         
         should_hide = "--hidden" in sys.argv or self.settings.get("autostart_minimize", False)
-        self.logger.debug(f"[{file_name}][{self.class_name}] 应用程序启动，隐藏状态: {should_hide}, 设置自启动最小化: {self.settings.get("autostart_minimize")}, 运行托盘: {self.settings.get("minimize_to_tray")}, should_hide: {should_hide}")
+        #self.logger.debug(f"[{file_name}][{self.class_name}] 应用程序启动，隐藏状态: {should_hide}, 设置自启动最小化: {self.settings.get("autostart_minimize")}, 运行托盘: {self.settings.get("minimize_to_tray")}, should_hide: {should_hide}")
         
         self.tray_manager.create_tray_icon()  # 初始化托盘
         self.logger.info(f"[{file_name}][{self.class_name}] 已创建托盘图标")
