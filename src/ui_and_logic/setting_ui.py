@@ -93,13 +93,13 @@ class SettingsDialog:
         cancel_button.pack(side=tk.RIGHT, fill=tk.X, padx=5)
         
         # 取消按钮
-        cancel_button = ttk.Button(
+        exit_button = ttk.Button(
             button_frame,
             text="退出",
             command=sys.exit(0),
             width=10
         )
-        cancel_button.pack(side=tk.LEFT, fill=tk.X, padx=5)
+        exit_button.pack(side=tk.LEFT, fill=tk.X, padx=5)
 
 
 
