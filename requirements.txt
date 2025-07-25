@@ -1,5 +1,7 @@
 Pyinstaller
 pandas
+pywin32
+psutil
 beautifulsoup4==4.12.2
 pytz==2023.3
 requests==2.31.0

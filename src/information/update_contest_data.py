@@ -28,7 +28,7 @@ class UpdateContestData:
     def prepare_contest_notify(self):
         contest_data = self.read_contest_data()
         if contest_data and isinstance(contest_data, list):
-            self.logger.info(f"[{file_name}][{self.class_name}][prepare_contest_notify] 读取成功，共 {len(contest_data)} 条记录")
+            self.logger.debug(f"[{file_name}][{self.class_name}][prepare_contest_notify] 读取成功，共 {len(contest_data)} 条记录")
             
             for contest in contest_data:
                 # 获取时间

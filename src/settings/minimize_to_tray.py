@@ -28,15 +28,24 @@ class MinimizeToTray:
         self.window.withdraw()
 
     def create_tray_icon(self):
-        icon_path = GAP().get_resource_path("resources/icons/app.ico")
-        image = Image.open(icon_path)
-        menu = pystray.Menu(
-            pystray.MenuItem("显示", self.on_show),
-            pystray.MenuItem("退出", self.on_quit)
-        )
-        self.tray_icon = pystray.Icon("App", image, "应用正在后台运行", menu)
-        threading.Thread(target=self.tray_icon.run, daemon=True).start()
+        self.logger.info(f"[{file_name}][{self.class_name}][create_tray_icon] self.tray_icon: {str(self.tray_icon)}")
+        if not self.tray_icon:
+            icon_path = GAP().get_resource_path("resources/icons/app.ico")
+            image = Image.open(icon_path)
+            menu = pystray.Menu(
+                pystray.MenuItem("显示", self.on_show),
+                pystray.MenuItem("退出", self.on_quit)
+            )
+            self.tray_icon = pystray.Icon("App", image, "应用正在后台运行", menu)
+            self.logger.info(f"[{file_name}][{self.class_name}][create_tray_icon] 已创建托盘图标 self.tray_icon: {str(self.tray_icon)}")
+            threading.Thread(target=self.tray_icon.run, daemon=True).start()
 
+    def remove_tray_icon(self):
+        if self.tray_icon:
+            self.tray_icon.stop()  # 停止托盘图标事件循环
+            self.tray_icon = None
+            self.logger.info(f"[{file_name}][{self.class_name}] 托盘图标已关闭")
+    
     def enable_running(self):
         self.logger.info(f"[{file_name}][{self.class_name}][enable_running] 启用最小化托盘")
         self.window.protocol("WM_DELETE_WINDOW", self.on_close)

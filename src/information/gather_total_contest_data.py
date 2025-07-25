@@ -30,7 +30,7 @@ class CaptureAllInformation:
         gnc = get_nowcoder()
         gat = get_atcoder()
         gcf = get_codeforces()
-        
+        self.setting = self.load_settings()
         res = []
         
         if self.command == "display":
@@ -38,19 +38,21 @@ class CaptureAllInformation:
             res += gnc.get_nc() if self.is_capture_contest("is_capture_nowcoder") else []
             res += gat.get_ac() if self.is_capture_contest("is_capture_atcoder") else []
             
-            self.logger.debug(f"[{file_name}][{self.class_name}] cf: {self.is_capture_contest("is_capture_codeforces")}")
-            self.logger.debug(f"[{file_name}][{self.class_name}] nk: {self.is_capture_contest("is_capture_nowcoder")}")
-            self.logger.debug(f"[{file_name}][{self.class_name}] at: {self.is_capture_contest("is_capture_atcoder")}")
-        
+            self.logger.debug(f"[{file_name}][{self.class_name}] 选择显示的比赛信息:\n" +
+                            f"cf: {self.is_capture_contest("is_capture_codeforces")}\n" +
+                            f"nk: {self.is_capture_contest("is_capture_nowcoder")}\n" +
+                            f"at: {self.is_capture_contest("is_capture_atcoder")}")
+                        
         elif self.command == "update":
             res += gcf.get_cf() if self.is_capture_contest("is_notify_codeforces") else []        
             res += gnc.get_nc() if self.is_capture_contest("is_notify_nowcoder") else []
             res += gat.get_ac() if self.is_capture_contest("is_notify_atcoder") else []
             
-            self.logger.debug(f"[{file_name}][{self.class_name}] cf: {self.is_capture_contest("is_notify_codeforces")}")
-            self.logger.debug(f"[{file_name}][{self.class_name}] nk: {self.is_capture_contest("is_notify_nowcoder")}")
-            self.logger.debug(f"[{file_name}][{self.class_name}] at: {self.is_capture_contest("is_notify_atcoder")}")
-       
+            self.logger.debug(f"[{file_name}][{self.class_name}] 选择更新比赛信息:\n" +
+                            f"cf: {self.is_capture_contest("is_notify_codeforces")}\n" + 
+                            f"nk: {self.is_capture_contest("is_notify_nowcoder")}\n" +
+                            f"at: {self.is_capture_contest("is_notify_atcoder")}")
+                    
         else:
             res += gcf.get_cf()
             res += gnc.get_nc()
