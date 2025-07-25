@@ -96,7 +96,7 @@ class SettingsDialog:
         exit_button = ttk.Button(
             button_frame,
             text="退出",
-            command=sys.exit(0),
+            command=self.handle_exit,
             width=10
         )
         exit_button.pack(side=tk.LEFT, fill=tk.X, padx=5)
@@ -121,6 +121,9 @@ class SettingsDialog:
     def handle_cancel(self):
         """处理取消按钮点击事件"""
         self.settings_manager.handle_cancel(self.dialog)
+        
+    def handle_exit(self):
+        sys.exit(0)
     
     #主窗口
     def center_window(self, child, parent):
