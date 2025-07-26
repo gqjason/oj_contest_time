@@ -18,7 +18,7 @@ class AutoStartManager:
         self.vbs_path = GAP().get_scripts_path()
         self.vbs_file_path = os.path.join(self.vbs_path, f"{self.app_name}_silent_launcher.vbs")
         self.task_name = f"startup_{self.app_name}"
-        self.task_path = f'wscript.exe "{self.exe_path}"'
+        self.task_path = f'wscript.exe {self.vbs_file_path}'
 
     
     def apply(self, autostart: bool, minimized: bool):
@@ -67,7 +67,7 @@ class AutoStartManager:
         # VBScript中双引号需要转义为两个双引号
         exe_path_escaped = exe_path_quoted.replace('"', '""')
         # 完整命令：转义后的路径 + 参数
-        run_command = f"{exe_path_escaped}"
+        run_command = f"{exe_path_escaped} --silent"
         
         # 构建VBScript内容
         vbs_content = f"""
@@ -92,7 +92,7 @@ class AutoStartManager:
             # 写入注册表
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
             key_root = winreg.HKEY_CURRENT_USER
-            reg_value = f'"{os.path.normpath(self.vbs_file_path)}" --silent'
+            reg_value = f'"{os.path.normpath(self.exe_path)}" --silent'
             with winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE) as key:
                 winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, reg_value)
             
