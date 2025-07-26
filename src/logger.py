@@ -4,7 +4,7 @@ from datetime import datetime
 from tkinter import ttk, messagebox
 from pathlib import Path
 
-from setting.get_configs_and_logs_path import GetAllPath as GAP
+from settings.get_all_path import GetAllPath as GAP
 
 class FileLogger:
     """
@@ -29,13 +29,18 @@ class FileLogger:
     logger_path = str(Path(__file__).parent.parent / "logs")
     
     @staticmethod
-    def get_today_str():
-        """获取当前日期字符串，格式为YYYY-MM-DD"""
+    def get_today_time_str():
+        """获取当前日期字符串，格式为YYYY-MM-DD-HHMM"""
+        return datetime.now().strftime("%Y_%m_%d_%H")
+    @staticmethod
+    def get_today_date_str():
+        """获取当前日期字符串，格式为YYYY-MM-DD-HHMM"""
         return datetime.now().strftime("%Y_%m_%d")
-    file_name = f"{get_today_str()}"
+    file_name = f"{get_today_time_str()}"
+    folder_name = f"{get_today_date_str()}"
 
     def __init__(self, log_level='INFO', max_size=10, backup_count=5):
-        self.log_dir = GAP().get_logs_path()
+        self.log_dir = GAP().get_logs_path() / self.folder_name
         self.log_level = self.LEVELS[log_level.upper()]
         self.max_size = max_size * 1024 * 1024  # 转为字节
         self.backup_count = backup_count

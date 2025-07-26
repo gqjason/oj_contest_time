@@ -4,9 +4,9 @@ import platform
 import subprocess
 from pathlib import Path
 
-from setting.minimize_to_tray import MinimizeToTray as MTT
-from setting.autostart_manager import AutoStartManager as ASM
-from setting.get_configs_and_logs_path import GetAllPath as GAP
+# from settings.minimize_to_tray import MinimizeToTray as MTT
+from settings.autostart_manager import AutoStartManager as ASM
+from settings.get_all_path import GetAllPath as GAP
 from logger import FileLogger
 
 file_name = "setting_logic.py"
@@ -16,19 +16,21 @@ class SettingsManager:
     """管理应用程序设置的类"""
     DEFAULT_SETTINGS = {
         "autostart": False,
-        "minimize_to_tray": False,
+        # "minimize_to_tray": False,
         "autostart_minimize": False,
-        "desktop_notify": False,
-
-        "theme": "light",
-        "language": "zh_CN",
         
         "is_capture_codeforces": False,
         "is_capture_nowcoder": False,
         "is_capture_atcoder": False,
+        
+        "desktop_notify": False,
+        "is_notify_codeforces": False,
+        "is_notify_nowcoder": False,
+        "is_notify_atcoder": False,
+        
     }
 
-    def __init__(self, main_window=None, config_file=None):
+    def __init__(self, main_window=None):
         self.main_window = main_window
         self.logger = FileLogger()
 
@@ -42,11 +44,11 @@ class SettingsManager:
         try:
             if not self.config_file.exists():
                 self.save_settings()  # 保存默认配置
-            if self.config_file.exists():
-                with open(self.config_file, 'r', encoding='utf-8') as f:
-                    loaded_settings = json.load(f)
-                    for key, value in self.DEFAULT_SETTINGS.items():
-                        self.settings[key] = loaded_settings.get(key, value)
+        
+            with open(self.config_file, 'r', encoding='utf-8') as f:
+                loaded_settings = json.load(f)
+                for key, value in self.DEFAULT_SETTINGS.items():
+                    self.settings[key] = loaded_settings.get(key, value)
         except Exception as e:
             self.logger.error(
                 f"[{file_name}][{self.class_name}][load_settings] 加载设置失败: {e}")
@@ -88,28 +90,34 @@ class SettingsManager:
     def apply_settings(self, ui_instance):
         """将设置应用到UI界面"""
         ui_instance.autostart_var.set(self.get_setting("autostart"))
-        ui_instance.minimize_to_tray_var.set(self.get_setting("minimize_to_tray"))
+        # ui_instance.minimize_to_tray_var.set(self.get_setting("minimize_to_tray"))
         ui_instance.autostart_minimize_var.set(self.get_setting("autostart_minimize"))
+        
+        ui_instance.capturing_codeforces_var.set(self.get_setting("is_capture_codeforces"))
+        ui_instance.capturing_nowcoder_var.set(self.get_setting("is_capture_nowcoder"))
+        ui_instance.capturing_atcoder_var.set(self.get_setting("is_capture_atcoder"))
+        
         ui_instance.desktop_notify_var.set(self.get_setting("desktop_notify"))
-        
-        ui_instance.capturing_codeforces.set(self.get_setting("is_capture_codeforces"))
-        ui_instance.capturing_nowcoder.set(self.get_setting("is_capture_nowcoder"))
-        ui_instance.capturing_atcoder.set(self.get_setting("is_capture_atcoder"))
-        
+        ui_instance.notify_codeforces_var.set(self.get_setting("is_notify_codeforces"))
+        ui_instance.notify_nowcoder_var.set(self.get_setting("is_notify_nowcoder"))
+        ui_instance.notify_atcoder_var.set(self.get_setting("is_notify_atcoder"))
         
 
     def handle_save(self, ui_instance):
         """处理保存按钮点击事件"""
         settings_data = {
             "autostart": ui_instance.autostart_var.get(),
-            "minimize_to_tray": ui_instance.minimize_to_tray_var.get(),
+            # "minimize_to_tray": ui_instance.minimize_to_tray_var.get(),
             "autostart_minimize": ui_instance.autostart_minimize_var.get(),
+            
+            "is_capture_codeforces": ui_instance.capturing_codeforces_var.get(),
+            "is_capture_nowcoder": ui_instance.capturing_nowcoder_var.get(),
+            "is_capture_atcoder": ui_instance.capturing_atcoder_var.get(),
+            
             "desktop_notify": ui_instance.desktop_notify_var.get(),
-            
-            "is_capture_codeforces": ui_instance.capturing_codeforces.get(),
-            "is_capture_nowcoder": ui_instance.capturing_nowcoder.get(),
-            "is_capture_atcoder": ui_instance.capturing_atcoder.get(),
-            
+            "is_notify_codeforces": ui_instance.notify_codeforces_var.get(),
+            "is_notify_nowcoder": ui_instance.notify_nowcoder_var.get(),
+            "is_notify_atcoder": ui_instance.notify_atcoder_var.get(),
         }
         
         self.update_settings(**settings_data)
@@ -120,14 +128,13 @@ class SettingsManager:
 
 
     def apply_system_settings(self):
-        mtt = MTT(self.main_window) # type: ignore
         asm = ASM()
         try:
             self.logger.info(f"[{file_name}][{self.class_name}] 正在应用系统设置...")
 
             autostart = self.settings.get("autostart", False)
             autostart_minimized = self.settings.get("autostart_minimize", False)
-            minimize_to_tray = self.settings.get("minimize_to_tray", False)
+            # minimize_to_tray = self.settings.get("minimize_to_tray", False)
             desktop_notify = self.settings.get("desktop_notify", False)
 
             # 合并开机启动逻辑
@@ -139,24 +146,20 @@ class SettingsManager:
                 self.logger.error(f"[{file_name}][{self.class_name}] 开机启动设置失败: {e}")
                 return False
 
-            # 最小化托盘逻辑
-            if self.main_window:
-                if minimize_to_tray:
-                    self.logger.info(f"[{file_name}][{self.class_name}] 启用最小化托盘...")
-                    mtt.enable_running()
-                else:
-                    self.logger.info(f"[{file_name}][{self.class_name}] 禁用最小化托盘...")
-                    mtt.disable_running()
-            else:
-                self.logger.warning(f"[{file_name}][{self.class_name}] 主窗口未设置，跳过最小化托盘设置")
+            # # 最小化托盘逻辑
+            # if self.main_window:
+            #     if minimize_to_tray:
+            #         self.logger.info(f"[{file_name}][{self.class_name}] 启用最小化托盘...")
+            #     else:
+            #         self.logger.info(f"[{file_name}][{self.class_name}] 禁用最小化托盘...")
+            # else:
+            #     self.logger.warning(f"[{file_name}][{self.class_name}] 主窗口未设置，跳过最小化托盘设置")
 
             # 桌面通知
             if desktop_notify:
                 self.logger.info(f"[{file_name}][{self.class_name}] 启用桌面通知...")
-                self.switch_system_notification(True)
             else:
                 self.logger.info(f"[{file_name}][{self.class_name}] 禁用桌面通知...")
-                self.switch_system_notification(False)
 
             self.logger.info(f"[{file_name}][{self.class_name}] 成功保存设置")
             return True
@@ -169,16 +172,7 @@ class SettingsManager:
     def handle_cancel(self, dialog):
         """处理取消按钮点击事件"""
         dialog.destroy()
-
-    def switch_system_notification(self, enable):
-        if enable:
-            try:
-                # 调用系统通知逻辑（待实现）
-                pass
-            except Exception as e:
-                self.logger.error(f"发送通知失败: {e}")
-                
-          
+                 
     def open_folder_in_explorer(self, path: str):
         """在操作系统的文件资源管理器中打开指定目录"""
         if not os.path.exists(path):

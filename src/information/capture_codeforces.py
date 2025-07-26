@@ -21,8 +21,7 @@ class get_codeforces:
             # 检查响应状态
             if response.status_code != 200:
                 self.logger.warning(
-                    f"[{file_name}][{self.class_name}][get_cf] \
-https API请求失败，状态码: {response.status_code}"
+                    f"[{file_name}][{self.class_name}][get_cf] https API请求失败，状态码: {response.status_code}"
                     )
                 return []
             
@@ -32,8 +31,7 @@ https API请求失败，状态码: {response.status_code}"
             # 检查API响应状态
             if data.get('status') != 'OK':
                 self.logger.error(
-                        f"[{file_name}][{self.class_name}][get_cf] \
-https API返回错误: {data.get('comment', '未知错误')}"
+                        f"[{file_name}][{self.class_name}][get_cf] https API返回错误: {data.get('comment', '未知错误')}"
                         )
                 return []
                 
@@ -49,8 +47,7 @@ https API返回错误: {data.get('comment', '未知错误')}"
                 # 检查响应状态
                 if response.status_code != 200:
                     self.logger.warning(
-                        f"[{file_name}][{self.class_name}][get_cf] \
-http API请求失败，状态码: {response.status_code}"
+                        f"[{file_name}][{self.class_name}][get_cf] http API请求失败，状态码: {response.status_code}"
                         )
                     return []
                 
@@ -60,16 +57,14 @@ http API请求失败，状态码: {response.status_code}"
                 # 检查API响应状态
                 if data.get('status') != 'OK':
                     self.logger.error(
-                        f"[{file_name}][{self.class_name}][get_cf] \
-http API返回错误: {data.get('comment', '未知错误')}"
+                        f"[{file_name}][{self.class_name}][get_cf] http API返回错误: {data.get('comment', '未知错误')}"
                         )
                     return []
                     
                 contests = data.get('result', [])
             except Exception as e:
                 self.logger.error(
-                    f"[{file_name}][{self.class_name}][get_cf] \
-请求API时出错: {e}"
+                    f"[{file_name}][{self.class_name}][get_cf] 请求API时出错: {e}"
                     )
                 return []
         
@@ -144,7 +139,7 @@ http API返回错误: {data.get('comment', '未知错误')}"
 # 测试代码
 if __name__ == "__main__":
     pass
-    contests = get_codeforces.get_cf()
+    contests = get_codeforces().get_cf()
     # for contest in contests:
     #     print(f"比赛标题: {contest['title']}")
     #     print(f"比赛链接: {contest['link']}")

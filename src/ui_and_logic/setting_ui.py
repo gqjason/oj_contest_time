@@ -1,14 +1,16 @@
+import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
 
 from logger import FileLogger
-
+from settings.get_all_path import GetAllPath as GAP
+from information.update_contest_data import UpdateContestData as UCD
 def temp():pass
 
 file_name = "setting_ui.py"
 class SettingsDialog:
-    
     class_name = "SettingsDialog"
+    
     """设置对话框类"""
     def __init__(self, parent, settings_manager):
         """
@@ -22,21 +24,25 @@ class SettingsDialog:
         self.settings_manager = settings_manager
         self.logger = FileLogger()
         
-        # 创建对话框
-        self.dialog = tk.Toplevel(parent)
-        self.dialog.title("设置")
-        self.dialog.geometry("500x450")
-        self.dialog.transient(parent)
-        self.dialog.grab_set()
-        self.dialog.resizable(True, True)
+        try:
+            # 创建对话框
+            self.dialog = tk.Toplevel(parent)
+            self.dialog.title("设置")
+            self.dialog.geometry("500x450")
+            self.dialog.transient(parent)
+            self.dialog.grab_set()
+            self.dialog.resizable(True, True)
+            
+            self.create_setting_widgets()
+            self.center_window(self.dialog, parent)
+            
+            # 应用当前设置到UI
+            self.settings_manager.apply_settings(self)
+            self.logger.info(f"[{file_name}][{self.class_name}] 创建设置窗口成功")
         
-        self.create_setting_widgets()
-        self.center_window(self.dialog, parent)
-        
-        # 应用当前设置到UI
-        self.settings_manager.apply_settings(self)
-        
-        
+        except Exception as e:
+            self.logger.error(f"[{file_name}][{self.class_name}][__init__] 创建设置窗口失败, 原因: {e}")
+
     def create_setting_widgets(self):
         setting_frame = ttk.Frame(self.dialog)
         setting_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -89,6 +95,15 @@ class SettingsDialog:
             width=10
         )
         cancel_button.pack(side=tk.RIGHT, fill=tk.X, padx=5)
+        
+        # 取消按钮
+        exit_button = ttk.Button(
+            button_frame,
+            text="退出",
+            command=self.handle_exit,
+            width=10
+        )
+        exit_button.pack(side=tk.LEFT, fill=tk.X, padx=5)
 
 
 
@@ -96,10 +111,10 @@ class SettingsDialog:
         """处理保存按钮点击事件"""
         if self.settings_manager.handle_save(self):
             messagebox.showinfo("成功", "设置已保存并应用")
-            self.logger.info(
-                f"[{file_name}][{self.class_name}] 设置已保存并应用"
-                )
+            self.logger.info(f"[{file_name}][{self.class_name}] 设置已保存并应用")
+            
             self.dialog.destroy()
+            UCD().updating_data()  # 更新要通知的比赛数据
         else:
             messagebox.showerror("错误", "保存设置失败")
             self.logger.error(
@@ -109,6 +124,9 @@ class SettingsDialog:
     def handle_cancel(self):
         """处理取消按钮点击事件"""
         self.settings_manager.handle_cancel(self.dialog)
+        
+    def handle_exit(self):
+        sys.exit(0)
     
     #主窗口
     def center_window(self, child, parent):
@@ -189,41 +207,41 @@ class SettingsDialog:
         )
         autostart_minimize_check.pack(anchor="w", pady=2)
 
-        # 是否最小化到后台运行
-        self.minimize_to_tray_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["minimize_to_tray"])
-        minimize_to_tray_check = ttk.Checkbutton(
-            frame,
-            text="最小化到后台运行",
-            variable=self.minimize_to_tray_var
-        )
-        minimize_to_tray_check.pack(anchor="w", pady=2)
+        # # 是否最小化到后台运行
+        # self.minimize_to_tray_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["minimize_to_tray"])
+        # minimize_to_tray_check = ttk.Checkbutton(
+        #     frame,
+        #     text="最小化到后台运行",
+        #     variable=self.minimize_to_tray_var
+        # )
+        # minimize_to_tray_check.pack(anchor="w", pady=2)
 
     # 比赛设置
     def create_contest_settings(self, frame):
-        # cf
-        self.capturing_codeforces = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_codeforces"])
-        capture_codeforces = ttk.Checkbutton(
+        # codeforces
+        self.capturing_codeforces_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_codeforces"])
+        capture_codeforces_check = ttk.Checkbutton(
             frame,
             text="codeforces",
-            variable=self.capturing_codeforces
+            variable=self.capturing_codeforces_var
         )
-        capture_codeforces.pack(anchor="w", pady=2)
+        capture_codeforces_check.pack(anchor="w", pady=2)
         # 牛客
-        self.capturing_nowcoder = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_nowcoder"])
-        capture_nowcoder = ttk.Checkbutton(
+        self.capturing_nowcoder_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_nowcoder"])
+        capture_nowcoder_check = ttk.Checkbutton(
             frame,
             text="牛客",
-            variable=self.capturing_nowcoder
+            variable=self.capturing_nowcoder_var
         )
-        capture_nowcoder.pack(anchor="w", pady=2)
+        capture_nowcoder_check.pack(anchor="w", pady=2)
         # atcoder
-        self.capturing_atcoder = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_atcoder"])
-        capture_atcoder = ttk.Checkbutton(
+        self.capturing_atcoder_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_capture_atcoder"])
+        capture_atcoder_check = ttk.Checkbutton(
             frame,
             text="atcoder",
-            variable=self.capturing_atcoder,
+            variable=self.capturing_atcoder_var,
         )
-        capture_atcoder.pack(anchor="w", pady=2)
+        capture_atcoder_check.pack(anchor="w", pady=2)
         
     # 通知设置
     def create_notify_frame(self, frame):
@@ -235,6 +253,35 @@ class SettingsDialog:
             variable=self.desktop_notify_var
         )
         desktop_notify_check.pack(anchor="w", pady=2)
+        
+        choice_contest_text = ttk.Label(
+            text= "选择你要通知的比赛",
+            foreground="#7f8c8d"
+        )
+        # codeforces
+        self.notify_codeforces_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_notify_codeforces"])
+        notify_codeforces_check = ttk.Checkbutton(
+            frame,
+            text="codeforces",
+            variable=self.notify_codeforces_var
+        )
+        notify_codeforces_check.pack(anchor="w", pady=2)
+        # 牛客
+        self.notify_nowcoder_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_notify_nowcoder"])
+        notify_nowcoder_check = ttk.Checkbutton(
+            frame,
+            text="牛客",
+            variable=self.notify_nowcoder_var
+        )
+        notify_nowcoder_check.pack(anchor="w", pady=2)
+        # atcoder
+        self.notify_atcoder_var = tk.BooleanVar(value=self.settings_manager.DEFAULT_SETTINGS["is_notify_atcoder"])
+        notify_atcoder_check = ttk.Checkbutton(
+            frame,
+            text="atcoder",
+            variable=self.notify_atcoder_var,
+        )
+        notify_atcoder_check.pack(anchor="w", pady=2)
         
     # 目录设置
     def create_file_directory_frame(self, frame):
@@ -258,10 +305,10 @@ class SettingsDialog:
         )
         self.open_logs_directory_button.place(x=5, y=35)  # y坐标向下偏移，按钮之间大概40像素
     def open_config_file(self):
-        target_config_path = self.settings_manager.config_path
+        target_config_path = GAP().get_settings_path().parent
         self.settings_manager.open_folder_in_explorer(target_config_path)
     def open_logs_file(self):
-        target_logs_path = self.logger.log_dir
+        target_logs_path = GAP().get_logs_path()
         self.settings_manager.open_folder_in_explorer(target_logs_path)
         
         

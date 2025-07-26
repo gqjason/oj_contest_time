@@ -1,0 +1,60 @@
+# app/background_worker.py
+
+import threading
+import time
+import random
+
+from logger import FileLogger
+from information.update_contest_data import UpdateContestData as UCD
+from settings.get_all_path import GetAllPath as GAP
+file_name = "background_worker.py"
+class AppBackgroundWorker:
+    class_name = "AppBackgroundWorker"
+    
+    def __init__(self):
+        self._running = False
+        self._thread = None
+        self.logger = FileLogger(log_level="DEBUG")
+
+    def background_run(self):
+        
+        ucd = UCD()
+        if not GAP().get_contest_data_path().exists():
+            self.logger.debug(f"[{file_name}][{self.class_name}][background_run] 初始化时更新数据")
+            ucd.updating_data() # 初始化
+            
+        self.logger.info(f"[{file_name}][{self.class_name}] 后台任务启动")
+        time_point_front, time_point_back = time.time(),time.time()
+        while self._running:
+            try:
+                # 在这里放置你的后台逻辑
+                #self.logger.debug(f"[{file_name}][{self.class_name}] 正在运行后台任务...")
+                
+                time_point_back =time.time()
+                if time_point_back - time_point_front >= 600:
+                    time_point_front = time_point_back
+                    ucd.updating_data()
+
+                time.sleep(random.uniform(6,8))
+                current_settings = GAP().load_settings()
+                #self.logger.debug(f"[{file_name}][{self.class_name}][run] \"desktop_notify\" is {current_settings["desktop_notify"]}")
+                if current_settings.get("desktop_notify", False):
+                    ucd.prepare_contest_notify()
+            except Exception as e:
+                self.logger.error(f"[{file_name}][{self.class_name}][background_run] 运行时异常: {e}")
+
+        self.logger.info(f"[{file_name}][{self.class_name}] 后台任务已停止")
+
+    def start(self):
+        if not self._running:
+            self._running = True
+            self._thread = threading.Thread(target=self.background_run, daemon=True)
+            self._thread.start()
+            self.logger.info(f"[{file_name}][{self.class_name}] 后台线程已启动")
+
+    def stop(self):
+        self._running = False
+        self.logger.info(f"[{file_name}][{self.class_name}] 停止信号已发出")
+
+if __name__ == "__main__":
+    pass

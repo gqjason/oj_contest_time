@@ -118,7 +118,6 @@ class get_atcoder:
                     minutes = int((total_seconds % 3600) // 60)
                     duration_display = f"{hours}:{minutes:02d}:00"
                     
-                    #print(start_time_china)
                     now_time = datetime.datetime.now()
                     
                     if now_time < start_time_beijing and "AtCoder Beginner Contest" in title:
@@ -146,7 +145,7 @@ class get_atcoder:
 # 测试代码
 if __name__ == "__main__":
     pass
-    contests = get_atcoder.get_ac()
+    contests = get_atcoder().get_ac()
     # for contest in contests:
     #     print(f"比赛标题: {contest['title']}")
     #     print(f"比赛链接: {contest['link']}")

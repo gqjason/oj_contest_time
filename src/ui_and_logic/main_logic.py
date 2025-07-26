@@ -1,7 +1,7 @@
 import threading
 import time
 
-from information.capture import CaptureAllInformation as CAI
+from information.gather_total_contest_data import CaptureAllInformation as CAI
 from .setting_logic import SettingsManager
 
 class AppLogic:
@@ -41,12 +41,13 @@ class AppLogic:
         """清空日志"""
         self._update_ui("clear")  # 特殊指令表示清空日志
     
+    
     def _get_today_data_thread(self):
         """在后台线程中获取当天比赛数据"""
         try:
             self._update_ui("")
             self._update_ui("> 正在获取比赛数据...\n")
-            cai = CAI()
+            cai = CAI(command="display")
             today_contest = cai.return_today_upcoming_contest()
             self._update_ui("[OJ_Bot]\n", clear=True)
             
@@ -73,7 +74,7 @@ class AppLogic:
         try:
             self._update_ui("")
             self._update_ui("> 正在获取比赛数据...\n")
-            cai = CAI()
+            cai = CAI(command="display")
             upcoming_contest = cai.return_all_upcoming_contest()
             self._update_ui("[OJ_Bot]\n", clear=True)
             
