@@ -92,7 +92,7 @@ class AutoStartManager:
             # 写入注册表
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
             key_root = winreg.HKEY_CURRENT_USER
-            reg_value = f'"{os.path.normpath(self.exe_path)}" --silent'
+            reg_value = f'"{os.path.normpath(self.vbs_file_path)}" --silent'
             with winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE) as key:
                 winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, reg_value)
             
