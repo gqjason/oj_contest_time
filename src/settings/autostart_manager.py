@@ -66,12 +66,12 @@ class AutoStartManager:
         # VBScript中双引号需要转义为两个双引号
         exe_path_escaped = exe_path_quoted.replace('"', '""')
         # 完整命令：转义后的路径 + 参数
-        run_command = f"{exe_path_escaped} --silent"
+        run_command = f"{exe_path_escaped}"
         
         # 构建VBScript内容
         vbs_content = f"""
-    Set WshShell = WScript.CreateObject("WScript.Shell")
-    WshShell.Run "{run_command}", 0, False
+    Set asmShell = WScript.CreateObject("WScript.Shell")
+    asmShell.Run "{run_command}", 0, False
         """
         
         # 清理空白行
@@ -91,10 +91,7 @@ class AutoStartManager:
             # 写入注册表
             key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
             key_root = winreg.HKEY_CURRENT_USER
-            
-            # 修正3：确保注册表值使用规范路径
-            reg_value = f'"{os.path.normpath(self.vbs_file_path)}"'
-            
+            reg_value = f'"{os.path.normpath(self.vbs_file_path)}" --silent'
             with winreg.OpenKey(key_root, key_path, 0, winreg.KEY_SET_VALUE) as key:
                 winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, reg_value)
             
